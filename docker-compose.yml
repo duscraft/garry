@@ -1,0 +1,69 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: garry-postgres
+    environment:
+      POSTGRES_USER: garry
+      POSTGRES_PASSWORD: garry
+      POSTGRES_DB: garry
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./apps/api/migrations:/docker-entrypoint-initdb.d/api:ro
+      - ./apps/auth/migrations:/docker-entrypoint-initdb.d/auth:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U garry"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  auth:
+    build:
+      context: ./apps/auth
+      dockerfile: Dockerfile
+    container_name: garry-auth
+    environment:
+      DATABASE_URL: postgres://garry:garry@postgres:5432/garry?sslmode=disable
+      JWT_SECRET: garry-dev-secret-change-in-production
+      PORT: "8081"
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: garry-api
+    environment:
+      DATABASE_URL: postgres://garry:garry@postgres:5432/garry?sslmode=disable
+      JWT_SECRET: garry-dev-secret-change-in-production
+      AUTH_SERVICE_URL: http://auth:8081
+      PORT: "8080"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth:
+        condition: service_started
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: garry-web
+    environment:
+      VITE_API_URL: http://localhost:8080/api/v1
+      VITE_AUTH_URL: http://localhost:8081/api/v1
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+      - auth
+
+volumes:
+  postgres_data:
