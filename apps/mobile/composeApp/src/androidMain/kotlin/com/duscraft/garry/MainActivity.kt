@@ -14,3 +14,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+actual fun dataStorePath(): String {
+    return "/data/data/com.duscraft.garry/files/garry_prefs.preferences_pb"
+}
