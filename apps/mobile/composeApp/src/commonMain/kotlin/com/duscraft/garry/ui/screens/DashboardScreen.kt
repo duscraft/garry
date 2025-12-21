@@ -13,6 +13,16 @@ import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.duscraft.garry.data.model.Warranty
+import com.duscraft.garry.data.repository.AuthRepository
+import com.duscraft.garry.data.repository.WarrantyRepository
+import com.duscraft.garry.ui.components.ErrorMessage
+import com.duscraft.garry.ui.components.LoadingIndicator
+import com.duscraft.garry.ui.components.StatsCard
+import com.duscraft.garry.ui.components.WarrantyCard
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable

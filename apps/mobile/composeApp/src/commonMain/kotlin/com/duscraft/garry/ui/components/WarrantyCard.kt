@@ -24,7 +24,6 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.ui.draw.scale
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
-import com.duscraft.garry.ui.components.StatusBadge
 
 @Composable
 fun WarrantyCard(
