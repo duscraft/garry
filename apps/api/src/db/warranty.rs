@@ -1,16 +1,25 @@
 use chrono::{Duration, Utc};
 use sqlx::PgPool;
+use utoipa::ToSchema;
 use uuid::Uuid;
 
 use crate::error::{AppError, Result};
-use crate::models::{CreateWarrantyRequest, UpdateWarrantyRequest, Warranty, WarrantyCategory, WarrantyFilters};
+use crate::models::{CreateWarrantyRequest, UpdateWarrantyRequest, Warranty, WarrantyFilters};
+
+#[derive(Debug, Clone)]
+pub struct PaginatedWarranties {
+    pub warranties: Vec<Warranty>,
+    pub total: i64,
+}
 
 pub async fn create_warranty(
     pool: &PgPool,
     user_id: &str,
     req: CreateWarrantyRequest,
 ) -> Result<Warranty> {
-    let warranty_months = req.warranty_months.unwrap_or_else(|| req.category.default_warranty_months());
+    let warranty_months = req
+        .warranty_months
+        .unwrap_or_else(|| req.category.default_warranty_months());
     let warranty_end_date = req.purchase_date + Duration::days(warranty_months as i64 * 30);
 
     let warranty = sqlx::query_as::<_, Warranty>(
@@ -44,14 +53,19 @@ pub async fn get_warranty_by_id(pool: &PgPool, id: Uuid, user_id: &str) -> Resul
         .ok_or_else(|| AppError::NotFound("Warranty not found".to_string()))
 }
 
-pub async fn list_warranties(pool: &PgPool, user_id: &str, filters: WarrantyFilters) -> Result<Vec<Warranty>> {
-    let limit = filters.limit.unwrap_or(50);
-    let offset = filters.offset.unwrap_or(0);
+pub async fn list_warranties(
+    pool: &PgPool,
+    user_id: &str,
+    filters: WarrantyFilters,
+) -> Result<PaginatedWarranties> {
+    let per_page = filters.per_page.unwrap_or(20).min(100).max(1);
+    let page = filters.page.unwrap_or(1).max(1);
+    let offset = (page - 1) * per_page;
 
-    let warranties = match (&filters.category, &filters.status) {
+    let (warranties, total) = match (&filters.category, &filters.status) {
         (Some(category), Some(status)) => {
             let (start_date, end_date) = get_status_date_range(status);
-            sqlx::query_as::<_, Warranty>(
+            let warranties = sqlx::query_as::<_, Warranty>(
                 r#"
                 SELECT * FROM warranties 
                 WHERE user_id = $1 AND category = $2 AND warranty_end_date >= $3 AND warranty_end_date <= $4
@@ -63,13 +77,25 @@ pub async fn list_warranties(pool: &PgPool, user_id: &str, filters: WarrantyFilt
             .bind(category)
             .bind(start_date)
             .bind(end_date)
-            .bind(limit)
+            .bind(per_page)
             .bind(offset)
             .fetch_all(pool)
-            .await?
+            .await?;
+
+            let count: (i64,) = sqlx::query_as(
+                "SELECT COUNT(*) FROM warranties WHERE user_id = $1 AND category = $2 AND warranty_end_date >= $3 AND warranty_end_date <= $4"
+            )
+            .bind(user_id)
+            .bind(category)
+            .bind(start_date)
+            .bind(end_date)
+            .fetch_one(pool)
+            .await?;
+
+            (warranties, count.0)
         }
         (Some(category), None) => {
-            sqlx::query_as::<_, Warranty>(
+            let warranties = sqlx::query_as::<_, Warranty>(
                 r#"
                 SELECT * FROM warranties 
                 WHERE user_id = $1 AND category = $2
@@ -79,14 +105,24 @@ pub async fn list_warranties(pool: &PgPool, user_id: &str, filters: WarrantyFilt
             )
             .bind(user_id)
             .bind(category)
-            .bind(limit)
+            .bind(per_page)
             .bind(offset)
             .fetch_all(pool)
-            .await?
+            .await?;
+
+            let count: (i64,) = sqlx::query_as(
+                "SELECT COUNT(*) FROM warranties WHERE user_id = $1 AND category = $2",
+            )
+            .bind(user_id)
+            .bind(category)
+            .fetch_one(pool)
+            .await?;
+
+            (warranties, count.0)
         }
         (None, Some(status)) => {
             let (start_date, end_date) = get_status_date_range(status);
-            sqlx::query_as::<_, Warranty>(
+            let warranties = sqlx::query_as::<_, Warranty>(
                 r#"
                 SELECT * FROM warranties 
                 WHERE user_id = $1 AND warranty_end_date >= $2 AND warranty_end_date <= $3
@@ -97,13 +133,24 @@ pub async fn list_warranties(pool: &PgPool, user_id: &str, filters: WarrantyFilt
             .bind(user_id)
             .bind(start_date)
             .bind(end_date)
-            .bind(limit)
+            .bind(per_page)
             .bind(offset)
             .fetch_all(pool)
-            .await?
+            .await?;
+
+            let count: (i64,) = sqlx::query_as(
+                "SELECT COUNT(*) FROM warranties WHERE user_id = $1 AND warranty_end_date >= $2 AND warranty_end_date <= $3"
+            )
+            .bind(user_id)
+            .bind(start_date)
+            .bind(end_date)
+            .fetch_one(pool)
+            .await?;
+
+            (warranties, count.0)
         }
         (None, None) => {
-            sqlx::query_as::<_, Warranty>(
+            let warranties = sqlx::query_as::<_, Warranty>(
                 r#"
                 SELECT * FROM warranties 
                 WHERE user_id = $1
@@ -112,22 +159,22 @@ pub async fn list_warranties(pool: &PgPool, user_id: &str, filters: WarrantyFilt
                 "#,
             )
             .bind(user_id)
-            .bind(limit)
+            .bind(per_page)
             .bind(offset)
             .fetch_all(pool)
-            .await?
+            .await?;
+
+            let count: (i64,) =
+                sqlx::query_as("SELECT COUNT(*) FROM warranties WHERE user_id = $1")
+                    .bind(user_id)
+                    .fetch_one(pool)
+                    .await?;
+
+            (warranties, count.0)
         }
     };
 
-    Ok(warranties)
-}
-
-pub async fn count_warranties(pool: &PgPool, user_id: &str) -> Result<i64> {
-    let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM warranties WHERE user_id = $1")
-        .bind(user_id)
-        .fetch_one(pool)
-        .await?;
-    Ok(count.0)
+    Ok(PaginatedWarranties { warranties, total })
 }
 
 pub async fn update_warranty(
@@ -186,7 +233,11 @@ pub async fn delete_warranty(pool: &PgPool, id: Uuid, user_id: &str) -> Result<(
     Ok(())
 }
 
-pub async fn get_expiring_warranties(pool: &PgPool, user_id: &str, days: i64) -> Result<Vec<Warranty>> {
+pub async fn get_expiring_warranties(
+    pool: &PgPool,
+    user_id: &str,
+    days: i64,
+) -> Result<Vec<Warranty>> {
     let now = Utc::now();
     let future_date = now + Duration::days(days);
 
@@ -206,7 +257,12 @@ pub async fn get_expiring_warranties(pool: &PgPool, user_id: &str, days: i64) ->
     Ok(warranties)
 }
 
-pub async fn update_receipt_url(pool: &PgPool, id: Uuid, user_id: &str, receipt_url: &str) -> Result<Warranty> {
+pub async fn update_receipt_url(
+    pool: &PgPool,
+    id: Uuid,
+    user_id: &str,
+    receipt_url: &str,
+) -> Result<Warranty> {
     let warranty = sqlx::query_as::<_, Warranty>(
         r#"
         UPDATE warranties 
@@ -234,14 +290,16 @@ pub async fn get_warranty_stats(pool: &PgPool, user_id: &str) -> Result<Warranty
         .fetch_one(pool)
         .await?;
 
-    let active: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM warranties WHERE user_id = $1 AND warranty_end_date > $2")
-        .bind(user_id)
-        .bind(now)
-        .fetch_one(pool)
-        .await?;
+    let active: (i64,) = sqlx::query_as(
+        "SELECT COUNT(*) FROM warranties WHERE user_id = $1 AND warranty_end_date > $2",
+    )
+    .bind(user_id)
+    .bind(now)
+    .fetch_one(pool)
+    .await?;
 
     let expiring_soon: (i64,) = sqlx::query_as(
-        "SELECT COUNT(*) FROM warranties WHERE user_id = $1 AND warranty_end_date > $2 AND warranty_end_date <= $3"
+        "SELECT COUNT(*) FROM warranties WHERE user_id = $1 AND warranty_end_date > $2 AND warranty_end_date <= $3",
     )
     .bind(user_id)
     .bind(now)
@@ -249,11 +307,13 @@ pub async fn get_warranty_stats(pool: &PgPool, user_id: &str) -> Result<Warranty
     .fetch_one(pool)
     .await?;
 
-    let expired: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM warranties WHERE user_id = $1 AND warranty_end_date <= $2")
-        .bind(user_id)
-        .bind(now)
-        .fetch_one(pool)
-        .await?;
+    let expired: (i64,) = sqlx::query_as(
+        "SELECT COUNT(*) FROM warranties WHERE user_id = $1 AND warranty_end_date <= $2",
+    )
+    .bind(user_id)
+    .bind(now)
+    .fetch_one(pool)
+    .await?;
 
     Ok(WarrantyStats {
         total: total.0,
@@ -263,7 +323,7 @@ pub async fn get_warranty_stats(pool: &PgPool, user_id: &str) -> Result<Warranty
     })
 }
 
-#[derive(Debug, serde::Serialize)]
+#[derive(Debug, serde::Serialize, ToSchema)]
 pub struct WarrantyStats {
     pub total: i64,
     pub active: i64,

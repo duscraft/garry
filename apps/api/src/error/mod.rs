@@ -1,6 +1,7 @@
 use axum::{http::StatusCode, response::IntoResponse, Json};
 use serde::Serialize;
 use thiserror::Error;
+use utoipa::ToSchema;
 
 #[derive(Error, Debug)]
 pub enum AppError {
@@ -13,20 +14,18 @@ pub enum AppError {
     #[error("Unauthorized")]
     Unauthorized,
 
-    #[error("Forbidden")]
-    Forbidden,
+    #[allow(dead_code)]
+    #[error("Too many requests")]
+    TooManyRequests,
 
     #[error("Database error: {0}")]
     Database(#[from] sqlx::Error),
-
-    #[error("Internal error: {0}")]
-    Internal(String),
 }
 
-#[derive(Serialize)]
-struct ErrorResponse {
-    error: String,
-    message: String,
+#[derive(Serialize, ToSchema)]
+pub struct ErrorResponse {
+    pub error: String,
+    pub message: String,
 }
 
 impl IntoResponse for AppError {
@@ -35,14 +34,10 @@ impl IntoResponse for AppError {
             AppError::NotFound(msg) => (StatusCode::NOT_FOUND, "not_found", msg.clone()),
             AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, "bad_request", msg.clone()),
             AppError::Unauthorized => (StatusCode::UNAUTHORIZED, "unauthorized", "Invalid or missing authentication".to_string()),
-            AppError::Forbidden => (StatusCode::FORBIDDEN, "forbidden", "Access denied".to_string()),
+            AppError::TooManyRequests => (StatusCode::TOO_MANY_REQUESTS, "too_many_requests", "Rate limit exceeded. Please try again later.".to_string()),
             AppError::Database(e) => {
                 tracing::error!("Database error: {:?}", e);
                 (StatusCode::INTERNAL_SERVER_ERROR, "database_error", "Database operation failed".to_string())
-            }
-            AppError::Internal(msg) => {
-                tracing::error!("Internal error: {}", msg);
-                (StatusCode::INTERNAL_SERVER_ERROR, "internal_error", "Internal server error".to_string())
             }
         };
 

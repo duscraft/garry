@@ -1,9 +1,10 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use utoipa::ToSchema;
 use uuid::Uuid;
 
-#[derive(Debug, Clone, Serialize, Deserialize, sqlx::Type, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::Type, PartialEq, ToSchema)]
 #[sqlx(type_name = "warranty_category", rename_all = "snake_case")]
 #[serde(rename_all = "snake_case")]
 pub enum WarrantyCategory {
@@ -42,7 +43,7 @@ impl WarrantyCategory {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow, ToSchema)]
 pub struct Warranty {
     pub id: Uuid,
     pub user_id: String,
@@ -59,7 +60,7 @@ pub struct Warranty {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct CreateWarrantyRequest {
     pub product_name: String,
     pub brand: Option<String>,
@@ -70,7 +71,7 @@ pub struct CreateWarrantyRequest {
     pub notes: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct UpdateWarrantyRequest {
     pub product_name: Option<String>,
     pub brand: Option<String>,
@@ -81,16 +82,19 @@ pub struct UpdateWarrantyRequest {
     pub notes: Option<String>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct WarrantyListResponse {
     pub warranties: Vec<Warranty>,
-    pub total: usize,
+    pub total: i64,
+    pub page: i64,
+    pub per_page: i64,
+    pub total_pages: i64,
 }
 
-#[derive(Debug, Deserialize, Default)]
+#[derive(Debug, Deserialize, Default, ToSchema)]
 pub struct WarrantyFilters {
     pub category: Option<WarrantyCategory>,
     pub status: Option<String>,
-    pub limit: Option<i64>,
-    pub offset: Option<i64>,
+    pub page: Option<i64>,
+    pub per_page: Option<i64>,
 }

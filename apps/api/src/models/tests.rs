@@ -102,8 +102,8 @@ mod tests {
         let filters = WarrantyFilters::default();
         assert_eq!(filters.category, None);
         assert_eq!(filters.status, None);
-        assert_eq!(filters.limit, None);
-        assert_eq!(filters.offset, None);
+        assert_eq!(filters.page, None);
+        assert_eq!(filters.per_page, None);
     }
 
     #[test]
