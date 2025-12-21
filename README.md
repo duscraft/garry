@@ -14,91 +14,145 @@ Garry est votre assistant personnel pour gérer toutes vos garanties et factures
 - 🔐 **Protéger** vos données avec un stockage sécurisé
 - ⏰ **Ne plus jamais** perdre un remboursement ou un échange
 
-## ✨ Fonctionnalités principales
+## 🏗️ Architecture
 
-### 📝 Ajout ultra-simple
-- Prenez une photo de votre facture ou produit
-- Renseignez 2-3 informations basiques
-- Garry s'occupe du reste !
+Garry est un monorepo composé de 4 applications :
 
-### 🧮 Calcul automatique des garanties
-- Durées légales FR/UE selon le type de produit
-- Date de fin claire : *"Votre garantie court jusqu'au 12 novembre 2026"*
-- Suivi des extensions de garantie
+```
+apps/
+├── api/          # API Rust/Axum - Gestion des garanties
+├── auth/         # Service Go/Chi - Authentification
+├── web/          # Frontend React/Vite/Tailwind
+└── mobile/       # App Kotlin Multiplatform (iOS/Android)
+```
 
-### 📊 Vue d'ensemble intuitive
-- Triez par date d'achat, fin de garantie ou catégorie
-- Indicateurs visuels : 🔴 expire bientôt • 🟠 attention • 🟢 valide
-- Retrouvez n'importe quel produit en un coup d'œil
+### Stack technique
 
-### 🔔 Rappels intelligents
-- Notifications 30 jours avant expiration
-- Emails de rappel personnalisés
-- Ne ratez plus jamais une échéance importante
+| Service | Technologie | Port |
+|---------|-------------|------|
+| API | Rust + Axum + SQLx | 8080 |
+| Auth | Go + Chi + pgx | 8081 |
+| Web | React + Vite + Tailwind | 3000 |
+| Mobile | Kotlin Multiplatform + Compose | - |
+| Base de données | PostgreSQL 16 | 5432 |
 
-## 🚀 Prochaines fonctionnalités
+## 🚀 Démarrage rapide
 
-### Version Premium (à venir)
-- 🔍 **OCR intelligent** : extraction automatique des informations de facture
-- ☁️ **Cloud chiffré** : vos données en sécurité, accessibles partout
-- 🧠 **IA de reconnaissance** : identification automatique du produit et de sa garantie
-- 👨‍👩‍👧‍👦 **Mode famille** : partagez vos garanties avec votre foyer
-- 📧 **Import email** : détection automatique des factures dans Gmail/Outlook
-- 📄 **Export PDF** : pour vos assurances et démarches SAV
+### Prérequis
 
-## 💰 Tarification
+- Docker & Docker Compose
+- (Optionnel) Node.js 20+ pour le développement web
+- (Optionnel) Rust 1.82+ pour le développement API
+- (Optionnel) Go 1.22+ pour le développement auth
+- (Optionnel) Android Studio pour le développement mobile
 
-### 🆓 Version Gratuite
-- Stockage local sécurisé
-- Rappels automatiques
-- Ajout manuel simple
+### Lancer avec Docker
 
-### ⭐ Version Premium (4,99€/mois)
-- OCR et extraction automatique
-- Stockage cloud chiffré
-- Catégorisation intelligente par IA
-- Mode partage famille
-- Import automatique depuis vos emails
-- Export PDF professionnel
+```bash
+# Clone le repo
+git clone https://github.com/duscraft/garry.git
+cd garry
 
-## 🔐 Sécurité et confidentialité
+# Démarre tous les services
+docker compose up -d
 
-Vos données vous appartiennent. Point.
+# Les services sont accessibles sur :
+# - Web: http://localhost:3000
+# - API: http://localhost:8080
+# - Auth: http://localhost:8081
+```
 
-- **Privacy-first** : aucune revente de données
-- **Chiffrement** de bout en bout (version premium)
-- **Stockage local** par défaut (version gratuite)
-- **Open source** : le code est transparent et auditable
+### Développement local
 
-## 🎨 Pourquoi "Garry" ?
+#### Web (React)
 
-Un nom simple, humain et mémorisable qui évoque :
-- Un assistant fiable et sympathique
-- La **garantie** (Garry / Garant)
-- Un compagnon du quotidien qui veille sur vos achats
+```bash
+cd apps/web
+npm install
+npm run dev
+```
 
-## 🛠️ Installation
+#### API (Rust)
 
-*En cours de développement. Bientôt disponible en version web (PWA) pour :*
-- 🌐 Navigateur web (tous appareils)
-- 📱 iOS et Android (PWA installable)
-- 💻 Desktop (Windows, macOS, Linux)
+```bash
+cd apps/api
+cargo run
+```
+
+#### Auth (Go)
+
+```bash
+cd apps/auth
+go run ./cmd/server
+```
+
+#### Mobile (Kotlin)
+
+Ouvrir `apps/mobile` dans Android Studio.
+
+### Variables d'environnement
+
+| Variable | Description | Défaut |
+|----------|-------------|--------|
+| `DATABASE_URL` | URL PostgreSQL | `postgres://garry:garry@localhost:5432/garry` |
+| `JWT_SECRET` | Secret JWT | `garry-dev-secret-change-in-production` |
+| `PORT` | Port du service | Varie selon le service |
+| `VITE_API_URL` | URL de l'API (web) | `http://localhost:8080/api/v1` |
+| `VITE_AUTH_URL` | URL auth (web) | `http://localhost:8081/api/v1` |
+
+## 📚 API Reference
+
+### Auth Service (port 8081)
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/api/v1/auth/register` | Inscription |
+| POST | `/api/v1/auth/login` | Connexion |
+| POST | `/api/v1/auth/refresh` | Rafraîchir le token |
+| POST | `/api/v1/auth/logout` | Déconnexion |
+
+### API Service (port 8080)
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/api/v1/warranties` | Liste des garanties |
+| POST | `/api/v1/warranties` | Créer une garantie |
+| GET | `/api/v1/warranties/:id` | Détail d'une garantie |
+| PUT | `/api/v1/warranties/:id` | Modifier une garantie |
+| DELETE | `/api/v1/warranties/:id` | Supprimer une garantie |
+| GET | `/api/v1/warranties/stats` | Statistiques |
+| GET | `/api/v1/warranties/expiring` | Garanties expirant bientôt |
+| GET | `/api/v1/warranties/categories` | Liste des catégories |
+
+## ✨ Fonctionnalités
+
+### Implémentées
+
+- ✅ Authentification JWT avec refresh token
+- ✅ CRUD complet des garanties
+- ✅ Calcul automatique de la date de fin
+- ✅ Indicateurs visuels de statut (valide/expire bientôt/expirée)
+- ✅ Dashboard avec statistiques
+- ✅ Interface responsive web et mobile
+- ✅ Support iOS et Android via Kotlin Multiplatform
+
+### Prochaines fonctionnalités
+
+- 🔜 Upload de photos/factures
+- 🔜 Notifications push
+- 🔜 OCR pour extraction automatique
+- 🔜 Mode famille (partage)
+- 🔜 Export PDF
 
 ## 🤝 Contribuer
 
 Garry est en développement actif. Vos retours sont précieux !
 
-- 💡 Proposez des fonctionnalités
-- 🐛 Signalez des bugs
-- 📖 Améliorez la documentation
-- 🌍 Aidez à la traduction
-
-## 📬 Contact
-
-Des questions ? Des suggestions ?
-
-- 📧 Email : [antoine.laborderie@gmail.com](mailto:garry+antoine.laborderie@gmail.com)
-- 💬 Discussions : [GitHub Discussions](https://github.com/duscraft/garry/discussions)
+1. Fork le repo
+2. Créer une branche (`git checkout -b feature/ma-feature`)
+3. Commit (`git commit -m 'feat: ma nouvelle feature'`)
+4. Push (`git push origin feature/ma-feature`)
+5. Ouvrir une Pull Request
 
 ## 📄 Licence
 
