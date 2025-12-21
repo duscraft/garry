@@ -9,9 +9,12 @@ import androidx.compose.ui.graphics.Color
 
 // Colors
 val PrimaryBlue = Color(0xFF2563EB)
+val PrimaryBlueDark = Color(0xFF1D4ED8)
 val AccentYellow = Color(0xFFFBBF24)
 val BackgroundLight = Color(0xFFF8FAFC)
 val BackgroundDark = Color(0xFF0F172A)
+val SurfaceDark = Color(0xFF1E293B)
+val SurfaceLight = Color(0xFFFFFFFF)
 
 // Status Colors
 val StatusGreen = Color(0xFF22C55E)
@@ -25,19 +28,24 @@ val Slate700 = Color(0xFF334155)
 val Slate600 = Color(0xFF475569)
 val Slate500 = Color(0xFF64748B)
 val Slate400 = Color(0xFF94A3B8)
+val Slate300 = Color(0xFFCBD5E1)
 val Slate200 = Color(0xFFE2E8F0)
+val Slate100 = Color(0xFFF1F5F9)
 
 private val LightColorScheme = lightColorScheme(
     primary = PrimaryBlue,
     onPrimary = Color.White,
+    primaryContainer = Color(0xFFDBEAFE),
+    onPrimaryContainer = Color(0xFF1E3A8A),
     secondary = AccentYellow,
     onSecondary = Slate900,
     background = BackgroundLight,
     onBackground = Slate900,
-    surface = Color.White,
+    surface = SurfaceLight,
     onSurface = Slate900,
-    surfaceVariant = Slate200,
-    onSurfaceVariant = Slate700,
+    surfaceVariant = Slate100,
+    onSurfaceVariant = Slate600,
+    outline = Slate300,
     error = StatusRed,
     onError = Color.White
 )
@@ -45,14 +53,17 @@ private val LightColorScheme = lightColorScheme(
 private val DarkColorScheme = darkColorScheme(
     primary = PrimaryBlue,
     onPrimary = Color.White,
+    primaryContainer = Color(0xFF1E3A8A),
+    onPrimaryContainer = Color(0xFFDBEAFE),
     secondary = AccentYellow,
     onSecondary = Slate900,
     background = BackgroundDark,
     onBackground = Color.White,
-    surface = Slate800,
+    surface = SurfaceDark,
     onSurface = Color.White,
-    surfaceVariant = Slate700,
-    onSurfaceVariant = Slate200,
+    surfaceVariant = Slate800,
+    onSurfaceVariant = Slate300,
+    outline = Slate600,
     error = StatusRed,
     onError = Color.White
 )

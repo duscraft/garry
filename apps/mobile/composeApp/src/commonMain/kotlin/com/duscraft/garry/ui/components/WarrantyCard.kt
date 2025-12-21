@@ -17,12 +17,25 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.toLocalDateTime
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+
+import androidx.compose.ui.draw.scale
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import com.duscraft.garry.ui.components.StatusBadge
+
 @Composable
 fun WarrantyCard(
     warranty: Warranty,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(if (isPressed) 0.95f else 1f)
+
     // Determine status based on dates
     // Note: In a real app, logic should be in ViewModel or utility, but we'll do simple check here
     val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
@@ -38,8 +51,13 @@ fun WarrantyCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            .scale(scale)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            ),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isPressed) 2.dp else 4.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
