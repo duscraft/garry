@@ -32,6 +32,10 @@ func (db *DB) Close() {
 	db.pool.Close()
 }
 
+func (db *DB) Ping(ctx context.Context) error {
+	return db.pool.Ping(ctx)
+}
+
 type User struct {
 	ID                     uuid.UUID
 	Email                  string
@@ -135,6 +139,22 @@ func (db *DB) ResetPassword(ctx context.Context, token, passwordHash string) err
 		`UPDATE users SET password_hash = $1, password_reset_token = NULL, password_reset_expires = NULL, updated_at = NOW()
 		 WHERE password_reset_token = $2 AND password_reset_expires > NOW()`,
 		passwordHash, token,
+	)
+	if err != nil {
+		return err
+	}
+
+	if result.RowsAffected() == 0 {
+		return ErrInvalidToken
+	}
+
+	return nil
+}
+
+func (db *DB) ResetPasswordByEmail(ctx context.Context, email, passwordHash string) error {
+	result, err := db.pool.Exec(ctx,
+		`UPDATE users SET password_hash = $1, updated_at = NOW() WHERE email = $2`,
+		passwordHash, email,
 	)
 	if err != nil {
 		return err

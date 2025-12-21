@@ -4,24 +4,26 @@ mod error;
 mod models;
 
 use std::net::SocketAddr;
-use std::sync::Arc;
+use std::time::Duration;
 
 use axum::{
     extract::{Path, Query, State},
-    http::{header, StatusCode, Request},
+    http::{header, Method, StatusCode, Request},
     middleware::{self, Next},
     response::Response,
-    routing::{delete, get, post, put},
+    routing::{get, post, put, delete},
     Json, Router,
 };
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
+use tower_http::trace::TraceLayer;
+use tracing::{info, warn, error, Span};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use uuid::Uuid;
 
-use config::Config;
-use db::{WarrantyStats};
+use config::{Config, Environment};
+use db::WarrantyStats;
 use error::{AppError, Result};
 use models::{CreateWarrantyRequest, UpdateWarrantyRequest, Warranty, WarrantyFilters, WarrantyListResponse};
 
@@ -45,19 +47,27 @@ struct AuthUser {
 #[tokio::main]
 async fn main() {
     tracing_subscriber::registry()
-        .with(tracing_subscriber::fmt::layer())
-        .with(tracing_subscriber::EnvFilter::from_default_env())
+        .with(tracing_subscriber::fmt::layer().json())
+        .with(tracing_subscriber::EnvFilter::from_default_env()
+            .add_directive("garry_api=info".parse().unwrap())
+            .add_directive("tower_http=info".parse().unwrap()))
         .init();
 
     let config = Config::from_env();
+    
+    info!(
+        environment = ?config.environment,
+        port = config.port,
+        "starting garry-api"
+    );
 
     let pool = match db::create_pool(&config.database_url).await {
         Ok(pool) => {
-            tracing::info!("Connected to database");
+            info!("connected to database");
             pool
         }
         Err(e) => {
-            tracing::warn!("Database not available, running in-memory mode: {}", e);
+            error!(error = %e, "failed to connect to database");
             panic!("Database connection required");
         }
     };
@@ -67,10 +77,7 @@ async fn main() {
         config: config.clone(),
     };
 
-    let cors = CorsLayer::new()
-        .allow_origin(Any)
-        .allow_methods(Any)
-        .allow_headers(Any);
+    let cors = build_cors_layer(&config);
 
     let public_routes = Router::new()
         .route("/health", get(health_check))
@@ -88,13 +95,49 @@ async fn main() {
         .merge(public_routes)
         .merge(protected_routes)
         .layer(cors)
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(|request: &Request<_>| {
+                    let request_id = uuid::Uuid::new_v4().to_string();
+                    tracing::info_span!(
+                        "request",
+                        method = %request.method(),
+                        uri = %request.uri(),
+                        request_id = %request_id,
+                    )
+                })
+                .on_response(|response: &Response, latency: Duration, _span: &Span| {
+                    info!(
+                        status = response.status().as_u16(),
+                        latency_ms = latency.as_millis(),
+                        "response"
+                    );
+                })
+        )
         .with_state(state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], config.port));
-    tracing::info!("Garry API starting on {}", addr);
+    info!(address = %addr, "listening");
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
+}
+
+fn build_cors_layer(config: &Config) -> CorsLayer {
+    let origins: Vec<_> = config.cors_origins
+        .iter()
+        .filter_map(|origin| origin.parse().ok())
+        .collect();
+
+    if origins.is_empty() || config.cors_origins.contains(&"*".to_string()) {
+        CorsLayer::permissive()
+    } else {
+        CorsLayer::new()
+            .allow_origin(origins)
+            .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE, Method::OPTIONS])
+            .allow_headers([header::AUTHORIZATION, header::CONTENT_TYPE, header::ACCEPT])
+            .allow_credentials(true)
+    }
 }
 
 async fn auth_middleware(
@@ -132,14 +175,31 @@ struct HealthResponse {
     status: String,
     service: String,
     version: String,
+    checks: HealthChecks,
 }
 
-async fn health_check() -> Json<HealthResponse> {
-    Json(HealthResponse {
-        status: "healthy".to_string(),
+#[derive(Debug, Serialize)]
+struct HealthChecks {
+    database: bool,
+}
+
+async fn health_check(State(state): State<AppState>) -> (StatusCode, Json<HealthResponse>) {
+    let db_healthy = sqlx::query("SELECT 1")
+        .fetch_one(&state.pool)
+        .await
+        .is_ok();
+
+    let status = if db_healthy { "healthy" } else { "unhealthy" };
+    let http_status = if db_healthy { StatusCode::OK } else { StatusCode::SERVICE_UNAVAILABLE };
+
+    (http_status, Json(HealthResponse {
+        status: status.to_string(),
         service: "garry-api".to_string(),
         version: env!("CARGO_PKG_VERSION").to_string(),
-    })
+        checks: HealthChecks {
+            database: db_healthy,
+        },
+    }))
 }
 
 #[derive(Debug, Serialize)]
@@ -202,8 +262,43 @@ async fn create_warranty(
     let payload: CreateWarrantyRequest = serde_json::from_slice(&body)
         .map_err(|e| AppError::BadRequest(format!("Invalid JSON: {}", e)))?;
 
+    validate_create_warranty(&payload)?;
+
     let warranty = db::create_warranty(&state.pool, &user.user_id, payload).await?;
+    
+    info!(warranty_id = %warranty.id, user_id = %user.user_id, "warranty created");
+    
     Ok((StatusCode::CREATED, Json(warranty)))
+}
+
+fn validate_create_warranty(req: &CreateWarrantyRequest) -> Result<()> {
+    if req.product_name.trim().is_empty() {
+        return Err(AppError::BadRequest("Product name is required".to_string()));
+    }
+    if req.product_name.len() > 200 {
+        return Err(AppError::BadRequest("Product name must be less than 200 characters".to_string()));
+    }
+    if let Some(ref brand) = req.brand {
+        if brand.len() > 100 {
+            return Err(AppError::BadRequest("Brand must be less than 100 characters".to_string()));
+        }
+    }
+    if let Some(ref store) = req.store {
+        if store.len() > 200 {
+            return Err(AppError::BadRequest("Store must be less than 200 characters".to_string()));
+        }
+    }
+    if let Some(ref notes) = req.notes {
+        if notes.len() > 2000 {
+            return Err(AppError::BadRequest("Notes must be less than 2000 characters".to_string()));
+        }
+    }
+    if let Some(months) = req.warranty_months {
+        if months < 1 || months > 120 {
+            return Err(AppError::BadRequest("Warranty months must be between 1 and 120".to_string()));
+        }
+    }
+    Ok(())
 }
 
 async fn get_warranty(
@@ -231,8 +326,45 @@ async fn update_warranty(
     let payload: UpdateWarrantyRequest = serde_json::from_slice(&body)
         .map_err(|e| AppError::BadRequest(format!("Invalid JSON: {}", e)))?;
 
+    validate_update_warranty(&payload)?;
+
     let warranty = db::update_warranty(&state.pool, id, &user.user_id, payload).await?;
+    
+    info!(warranty_id = %warranty.id, user_id = %user.user_id, "warranty updated");
+    
     Ok(Json(warranty))
+}
+
+fn validate_update_warranty(req: &UpdateWarrantyRequest) -> Result<()> {
+    if let Some(ref name) = req.product_name {
+        if name.trim().is_empty() {
+            return Err(AppError::BadRequest("Product name cannot be empty".to_string()));
+        }
+        if name.len() > 200 {
+            return Err(AppError::BadRequest("Product name must be less than 200 characters".to_string()));
+        }
+    }
+    if let Some(ref brand) = req.brand {
+        if brand.len() > 100 {
+            return Err(AppError::BadRequest("Brand must be less than 100 characters".to_string()));
+        }
+    }
+    if let Some(ref store) = req.store {
+        if store.len() > 200 {
+            return Err(AppError::BadRequest("Store must be less than 200 characters".to_string()));
+        }
+    }
+    if let Some(ref notes) = req.notes {
+        if notes.len() > 2000 {
+            return Err(AppError::BadRequest("Notes must be less than 2000 characters".to_string()));
+        }
+    }
+    if let Some(months) = req.warranty_months {
+        if months < 1 || months > 120 {
+            return Err(AppError::BadRequest("Warranty months must be between 1 and 120".to_string()));
+        }
+    }
+    Ok(())
 }
 
 async fn delete_warranty_handler(
@@ -243,6 +375,9 @@ async fn delete_warranty_handler(
     let user = request.extensions().get::<AuthUser>().ok_or(AppError::Unauthorized)?;
 
     db::delete_warranty(&state.pool, id, &user.user_id).await?;
+    
+    info!(warranty_id = %id, user_id = %user.user_id, "warranty deleted");
+    
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -257,7 +392,7 @@ async fn list_expiring(
     request: Request<axum::body::Body>,
 ) -> Result<Json<WarrantyListResponse>> {
     let user = request.extensions().get::<AuthUser>().ok_or(AppError::Unauthorized)?;
-    let days = query.days.unwrap_or(30);
+    let days = query.days.unwrap_or(30).min(365).max(1);
 
     let warranties = db::get_expiring_warranties(&state.pool, &user.user_id, days).await?;
     let total = warranties.len();
@@ -285,5 +420,8 @@ async fn upload_receipt(
     let receipt_url = format!("/uploads/{}/{}.jpg", user.user_id, id);
 
     let warranty = db::update_receipt_url(&state.pool, id, &user.user_id, &receipt_url).await?;
+    
+    info!(warranty_id = %id, user_id = %user.user_id, "receipt uploaded");
+    
     Ok(Json(warranty))
 }

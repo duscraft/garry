@@ -18,19 +18,41 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: garry-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    command: redis-server --appendonly yes
+
   auth:
     build:
       context: ./apps/auth
       dockerfile: Dockerfile
     container_name: garry-auth
     environment:
+      ENVIRONMENT: development
       DATABASE_URL: postgres://garry:garry@postgres:5432/garry?sslmode=disable
+      REDIS_URL: redis://redis:6379
       JWT_SECRET: garry-dev-secret-change-in-production
+      CORS_ORIGINS: http://localhost:3000,http://localhost:5173
+      BCRYPT_COST: "12"
+      RATE_LIMIT_RPS: "10"
+      RATE_LIMIT_BURST: "20"
       PORT: "8081"
     ports:
       - "8081:8081"
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   api:
@@ -39,9 +61,11 @@ services:
       dockerfile: Dockerfile
     container_name: garry-api
     environment:
+      ENVIRONMENT: development
       DATABASE_URL: postgres://garry:garry@postgres:5432/garry?sslmode=disable
       JWT_SECRET: garry-dev-secret-change-in-production
       AUTH_SERVICE_URL: http://auth:8081
+      CORS_ORIGINS: http://localhost:3000,http://localhost:5173
       PORT: "8080"
     ports:
       - "8080:8080"
@@ -67,3 +91,4 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
