@@ -1,0 +1,33 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Manage all your warranties in one place",
+    "stats": {
+      "total": "Total warranties",
+      "active": "Active",
+      "expiring": "Expiring soon",
+      "expired": "Expired"
+    },
+    "search": "Search a warranty...",
+    "refresh": "Refresh",
+    "noWarranties": "No warranties",
+    "startAdding": "Start by adding your first warranty.",
+    "addWarranty": "Add warranty",
+    "loading": "Loading...",
+    "error": "Error loading data",
+    "retry": "Retry"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "add": "Add",
+    "logout": "Logout",
+    "profile": "Profile"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View"
+  }
+}

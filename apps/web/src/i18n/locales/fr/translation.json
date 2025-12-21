@@ -1,0 +1,33 @@
+{
+  "dashboard": {
+    "title": "Tableau de bord",
+    "subtitle": "Gérez toutes vos garanties en un seul endroit",
+    "stats": {
+      "total": "Total garanties",
+      "active": "Actives",
+      "expiring": "Expire bientôt",
+      "expired": "Expirées"
+    },
+    "search": "Rechercher une garantie...",
+    "refresh": "Actualiser",
+    "noWarranties": "Aucune garantie",
+    "startAdding": "Commencez par ajouter votre première garantie.",
+    "addWarranty": "Ajouter une garantie",
+    "loading": "Chargement...",
+    "error": "Impossible de charger les données",
+    "retry": "Réessayer"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "add": "Ajouter",
+    "logout": "Déconnexion",
+    "profile": "Profil"
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "view": "Voir"
+  }
+}

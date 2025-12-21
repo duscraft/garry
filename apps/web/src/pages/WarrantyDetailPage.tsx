@@ -5,7 +5,7 @@ import { Warranty } from '../types';
 import Navbar from '../components/Navbar';
 import { formatDate, getWarrantyStatus, getDaysRemaining } from '../utils/date';
 import StatusBadge from '../components/StatusBadge';
-import { ArrowLeft, Calendar, Tag, Store, Clock, FileText, Trash2, Edit } from 'lucide-react';
+import { ArrowLeft, Calendar, Tag, Store, Clock, FileText, Trash2 } from 'lucide-react';
 
 const WarrantyDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
