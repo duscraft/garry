@@ -19,6 +19,10 @@ import com.duscraft.garry.ui.theme.PrimaryBlue
 import com.duscraft.garry.ui.theme.Slate900
 import kotlinx.coroutines.launch
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Fingerprint
+import com.duscraft.garry.platform.rememberBiometricManager
+
 @Composable
 fun LoginScreen(
     authRepository: AuthRepository,
@@ -31,6 +35,17 @@ fun LoginScreen(
     var error by remember { mutableStateOf<String?>(null) }
     
     val scope = rememberCoroutineScope()
+    val biometricManager = rememberBiometricManager()
+    val canAuthenticate = remember { biometricManager.canAuthenticate() }
+
+    LaunchedEffect(Unit) {
+        if (canAuthenticate && authRepository.isLoggedIn()) {
+            val authenticated = biometricManager.authenticate()
+            if (authenticated) {
+                onLoginSuccess()
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -47,7 +62,7 @@ fun LoginScreen(
                 .padding(24.dp)
                 .fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = Color.White
+                containerColor = MaterialTheme.colorScheme.surface
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
@@ -59,7 +74,7 @@ fun LoginScreen(
                     text = "Connexion",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Slate900
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -118,6 +133,32 @@ fun LoginScreen(
                         )
                     } else {
                         Text("Se connecter")
+                    }
+                }
+                
+                if (canAuthenticate) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                if (authRepository.isLoggedIn()) {
+                                    val authenticated = biometricManager.authenticate()
+                                    if (authenticated) {
+                                        onLoginSuccess()
+                                    }
+                                } else {
+                                    error = "Connectez-vous d'abord avec mot de passe"
+                                }
+                            }
+                        },
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Fingerprint,
+                            contentDescription = "Authentification biométrique",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(32.dp)
+                        )
                     }
                 }
                 
