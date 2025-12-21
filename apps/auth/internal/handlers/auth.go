@@ -388,16 +388,217 @@ func (h *Handler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.db.VerifyEmail(r.Context(), req.Token); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid_token", "Invalid verification token")
+	if req.Token == "" {
+		writeError(w, http.StatusBadRequest, "validation_error", "Token is required")
 		return
 	}
 
-	h.logger.Info("email verified", "token", req.Token[:8]+"...")
+	email, err := h.tokenStore.GetEmailVerificationToken(r.Context(), req.Token)
+	if err != nil {
+		if err := h.db.VerifyEmailByToken(r.Context(), req.Token); err != nil {
+			writeError(w, http.StatusBadRequest, "invalid_token", "Invalid or expired verification token")
+			return
+		}
+	} else {
+		if err := h.db.VerifyEmailByEmail(r.Context(), email); err != nil {
+			h.logger.Error("failed to verify email", "error", err)
+			writeError(w, http.StatusInternalServerError, "server_error", "Failed to verify email")
+			return
+		}
+		h.tokenStore.DeleteEmailVerificationToken(r.Context(), req.Token)
+	}
+
+	h.logger.Info("email verified")
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(models.MessageResponse{
 		Message: "Email verified successfully",
+	})
+}
+
+func (h *Handler) SendVerificationEmail(w http.ResponseWriter, r *http.Request) {
+	userIDStr := r.Context().Value("user_id").(string)
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_user_id", "Invalid user ID")
+		return
+	}
+
+	dbUser, err := h.db.GetUserByID(r.Context(), userID)
+	if err != nil {
+		writeError(w, http.StatusNotFound, "user_not_found", "User not found")
+		return
+	}
+
+	if dbUser.EmailVerified {
+		writeError(w, http.StatusBadRequest, "already_verified", "Email is already verified")
+		return
+	}
+
+	token := uuid.New().String()
+	if err := h.tokenStore.StoreEmailVerificationToken(r.Context(), dbUser.Email, token, 24*time.Hour); err != nil {
+		h.logger.Error("failed to store verification token", "error", err)
+		writeError(w, http.StatusInternalServerError, "server_error", "Failed to send verification email")
+		return
+	}
+
+	h.logger.Info("verification email sent (stub)", "email", dbUser.Email, "token", token[:8]+"...")
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(models.MessageResponse{
+		Message: "Verification email sent",
+	})
+}
+
+func (h *Handler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
+	userIDStr := r.Context().Value("user_id").(string)
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_user_id", "Invalid user ID")
+		return
+	}
+
+	var req models.DeleteAccountRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_request", "Invalid request body")
+		return
+	}
+
+	if req.Password == "" {
+		writeError(w, http.StatusBadRequest, "validation_error", "Password is required for account deletion")
+		return
+	}
+
+	dbUser, err := h.db.GetUserByID(r.Context(), userID)
+	if err != nil {
+		writeError(w, http.StatusNotFound, "user_not_found", "User not found")
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(dbUser.PasswordHash), []byte(req.Password)); err != nil {
+		writeError(w, http.StatusUnauthorized, "invalid_password", "Invalid password")
+		return
+	}
+
+	h.tokenStore.DeleteAllUserSessions(r.Context(), userID)
+	h.tokenStore.DeleteAllUserRefreshTokens(r.Context(), userID)
+
+	if err := h.db.DeleteUser(r.Context(), userID); err != nil {
+		h.logger.Error("failed to delete user", "user_id", userID, "error", err)
+		writeError(w, http.StatusInternalServerError, "server_error", "Failed to delete account")
+		return
+	}
+
+	h.logger.Info("user account deleted (GDPR)", "user_id", userID)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(models.MessageResponse{
+		Message: "Account deleted successfully",
+	})
+}
+
+func (h *Handler) ListSessions(w http.ResponseWriter, r *http.Request) {
+	userIDStr := r.Context().Value("user_id").(string)
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_user_id", "Invalid user ID")
+		return
+	}
+
+	currentSessionID := r.Header.Get("X-Session-ID")
+
+	sessionsMap, err := h.tokenStore.GetUserSessions(r.Context(), userID)
+	if err != nil {
+		h.logger.Error("failed to get user sessions", "error", err)
+		writeError(w, http.StatusInternalServerError, "server_error", "Failed to retrieve sessions")
+		return
+	}
+
+	sessions := make([]models.Session, 0, len(sessionsMap))
+	for sessionID, data := range sessionsMap {
+		sessions = append(sessions, models.Session{
+			ID:        sessionID,
+			UserAgent: data.UserAgent,
+			IPAddress: data.IPAddress,
+			CreatedAt: time.Unix(data.CreatedAt, 0),
+			ExpiresAt: time.Unix(data.ExpiresAt, 0),
+			Current:   sessionID == currentSessionID,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(models.SessionsResponse{
+		Sessions: sessions,
+	})
+}
+
+func (h *Handler) RevokeSession(w http.ResponseWriter, r *http.Request) {
+	userIDStr := r.Context().Value("user_id").(string)
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_user_id", "Invalid user ID")
+		return
+	}
+
+	var req models.RevokeSessionRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_request", "Invalid request body")
+		return
+	}
+
+	if req.SessionID == "" {
+		writeError(w, http.StatusBadRequest, "validation_error", "Session ID is required")
+		return
+	}
+
+	session, err := h.tokenStore.GetSession(r.Context(), req.SessionID)
+	if err != nil {
+		writeError(w, http.StatusNotFound, "session_not_found", "Session not found")
+		return
+	}
+
+	if session.UserID != userID.String() {
+		writeError(w, http.StatusForbidden, "forbidden", "Cannot revoke another user's session")
+		return
+	}
+
+	if err := h.tokenStore.DeleteSession(r.Context(), userID, req.SessionID); err != nil {
+		h.logger.Error("failed to revoke session", "error", err)
+		writeError(w, http.StatusInternalServerError, "server_error", "Failed to revoke session")
+		return
+	}
+
+	h.logger.Info("session revoked", "user_id", userID, "session_id", req.SessionID)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(models.MessageResponse{
+		Message: "Session revoked successfully",
+	})
+}
+
+func (h *Handler) RevokeAllSessions(w http.ResponseWriter, r *http.Request) {
+	userIDStr := r.Context().Value("user_id").(string)
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_user_id", "Invalid user ID")
+		return
+	}
+
+	if err := h.tokenStore.DeleteAllUserSessions(r.Context(), userID); err != nil {
+		h.logger.Error("failed to revoke all sessions", "error", err)
+		writeError(w, http.StatusInternalServerError, "server_error", "Failed to revoke sessions")
+		return
+	}
+
+	if err := h.tokenStore.DeleteAllUserRefreshTokens(r.Context(), userID); err != nil {
+		h.logger.Error("failed to delete refresh tokens", "error", err)
+	}
+
+	h.logger.Info("all sessions revoked", "user_id", userID)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(models.MessageResponse{
+		Message: "All sessions revoked successfully",
 	})
 }
 

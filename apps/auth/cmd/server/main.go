@@ -76,6 +76,11 @@ func main() {
 			r.Use(middleware.AuthRequired(cfg.JWTSecret))
 			r.Get("/me", h.GetCurrentUser)
 			r.Post("/logout", h.Logout)
+			r.Post("/send-verification-email", h.SendVerificationEmail)
+			r.Delete("/account", h.DeleteAccount)
+			r.Get("/sessions", h.ListSessions)
+			r.Post("/sessions/revoke", h.RevokeSession)
+			r.Post("/sessions/revoke-all", h.RevokeAllSessions)
 		})
 	})
 
