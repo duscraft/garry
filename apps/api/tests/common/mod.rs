@@ -1,14 +1,13 @@
 use axum::Router;
-use std::sync::Arc;
 use tower_http::cors::{Any, CorsLayer};
 
 pub async fn create_test_app() -> Router {
     use axum::{
-        extract::{Path, Query, State},
+        extract::State,
         http::{header, StatusCode, Request},
         middleware::{self, Next},
         response::Response,
-        routing::{delete, get, post, put},
+        routing::{get, post},
         Json,
     };
     use jsonwebtoken::{decode, DecodingKey, Validation};

@@ -22,6 +22,9 @@ tower = "0.4"
 axum-extra = { version = "0.9", features = ["typed-header"] }
 jsonwebtoken = "9"
 async-trait = "0.1"
+tower_governor = "0.4"
+utoipa = { version = "4", features = ["axum_extras", "uuid", "chrono"] }
+utoipa-swagger-ui = { version = "7", features = ["axum"] }
 
 [dev-dependencies]
 tower = { version = "0.4", features = ["util"] }
