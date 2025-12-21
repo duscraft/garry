@@ -59,7 +59,7 @@ pub struct Warranty {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct CreateWarrantyRequest {
     pub product_name: String,
     pub brand: Option<String>,
@@ -70,7 +70,7 @@ pub struct CreateWarrantyRequest {
     pub notes: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UpdateWarrantyRequest {
     pub product_name: Option<String>,
     pub brand: Option<String>,
