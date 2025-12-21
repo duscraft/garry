@@ -17,7 +17,7 @@ use axum::{
 };
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
-use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
+use tower_governor::{governor::GovernorConfigBuilder, key_extractor::PeerIpKeyExtractor, GovernorLayer};
 use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 use tracing::{info, Span};
@@ -134,6 +134,7 @@ async fn main() {
         GovernorConfigBuilder::default()
             .per_second(10)
             .burst_size(50)
+            .key_extractor(PeerIpKeyExtractor)
             .finish()
             .unwrap(),
     );
@@ -161,13 +162,13 @@ async fn main() {
         .layer(middleware::from_fn_with_state(
             state.clone(),
             auth_middleware,
-        ));
+        ))
+        .layer(GovernorLayer {
+            config: governor_conf,
+        });
 
     let app = public_routes
         .merge(protected_routes)
-        .layer(GovernorLayer {
-            config: governor_conf,
-        })
         .layer(cors)
         .layer(
             TraceLayer::new_for_http()
@@ -195,7 +196,7 @@ async fn main() {
     info!(address = %addr, "listening");
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
-    axum::serve(listener, app).await.unwrap();
+    axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>()).await.unwrap();
 }
 
 fn build_cors_layer(config: &Config) -> CorsLayer {
