@@ -197,6 +197,65 @@ func (db *DB) DeleteAllUserRefreshTokens(ctx context.Context, userID uuid.UUID) 
 	return err
 }
 
+func (db *DB) DeleteUser(ctx context.Context, userID uuid.UUID) error {
+	tx, err := db.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	if _, err := tx.Exec(ctx, `DELETE FROM refresh_tokens WHERE user_id = $1`, userID); err != nil {
+		return err
+	}
+
+	result, err := tx.Exec(ctx, `DELETE FROM users WHERE id = $1`, userID)
+	if err != nil {
+		return err
+	}
+
+	if result.RowsAffected() == 0 {
+		return ErrUserNotFound
+	}
+
+	return tx.Commit(ctx)
+}
+
+func (db *DB) VerifyEmailByToken(ctx context.Context, token string) error {
+	result, err := db.pool.Exec(ctx,
+		`UPDATE users SET email_verified = true, email_verification_token = NULL, updated_at = NOW()
+		 WHERE email_verification_token = $1`,
+		token,
+	)
+	if err != nil {
+		return err
+	}
+
+	if result.RowsAffected() == 0 {
+		return ErrInvalidToken
+	}
+
+	return nil
+}
+
+func (db *DB) VerifyEmailByEmail(ctx context.Context, email string) error {
+	result, err := db.pool.Exec(ctx,
+		`UPDATE users SET email_verified = true, email_verification_token = NULL, updated_at = NOW()
+		 WHERE email = $1`,
+		email,
+	)
+	if err != nil {
+		return err
+	}
+
+	if result.RowsAffected() == 0 {
+		return ErrUserNotFound
+	}
+
+	return nil
+}
+
+var ErrUserNotFound = &DBError{Message: "user not found"}
+
 var ErrInvalidToken = &DBError{Message: "invalid or expired token"}
 
 type DBError struct {

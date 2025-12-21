@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"log/slog"
 	"net/http"
@@ -387,5 +388,108 @@ func TestGenerateRefreshToken(t *testing.T) {
 
 	if len(token1) != 36 {
 		t.Errorf("refresh token should be UUID format (36 chars), got %d", len(token1))
+	}
+}
+
+func TestVerifyEmail_EmptyToken(t *testing.T) {
+	handler := newTestHandler()
+
+	body := models.VerifyEmailRequest{Token: ""}
+	bodyBytes, _ := json.Marshal(body)
+
+	req := httptest.NewRequest(http.MethodPost, "/verify-email", bytes.NewBuffer(bodyBytes))
+	w := httptest.NewRecorder()
+
+	handler.VerifyEmail(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("expected status %d, got %d", http.StatusBadRequest, w.Code)
+	}
+
+	var response models.ErrorResponse
+	json.NewDecoder(w.Body).Decode(&response)
+
+	if response.Error != "validation_error" {
+		t.Errorf("expected error 'validation_error', got '%s'", response.Error)
+	}
+}
+
+func TestDeleteAccount_InvalidBody(t *testing.T) {
+	handler := newTestHandler()
+
+	ctx := context.WithValue(context.Background(), "user_id", "550e8400-e29b-41d4-a716-446655440000")
+	req := httptest.NewRequest(http.MethodDelete, "/account", bytes.NewBufferString("invalid json"))
+	req = req.WithContext(ctx)
+	w := httptest.NewRecorder()
+
+	handler.DeleteAccount(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("expected status %d, got %d", http.StatusBadRequest, w.Code)
+	}
+}
+
+func TestDeleteAccount_EmptyPassword(t *testing.T) {
+	handler := newTestHandler()
+
+	ctx := context.WithValue(context.Background(), "user_id", "550e8400-e29b-41d4-a716-446655440000")
+	body := models.DeleteAccountRequest{Password: ""}
+	bodyBytes, _ := json.Marshal(body)
+
+	req := httptest.NewRequest(http.MethodDelete, "/account", bytes.NewBuffer(bodyBytes))
+	req = req.WithContext(ctx)
+	w := httptest.NewRecorder()
+
+	handler.DeleteAccount(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("expected status %d, got %d", http.StatusBadRequest, w.Code)
+	}
+
+	var response models.ErrorResponse
+	json.NewDecoder(w.Body).Decode(&response)
+
+	if response.Error != "validation_error" {
+		t.Errorf("expected error 'validation_error', got '%s'", response.Error)
+	}
+}
+
+func TestRevokeSession_InvalidBody(t *testing.T) {
+	handler := newTestHandler()
+
+	ctx := context.WithValue(context.Background(), "user_id", "550e8400-e29b-41d4-a716-446655440000")
+	req := httptest.NewRequest(http.MethodPost, "/sessions/revoke", bytes.NewBufferString("invalid json"))
+	req = req.WithContext(ctx)
+	w := httptest.NewRecorder()
+
+	handler.RevokeSession(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("expected status %d, got %d", http.StatusBadRequest, w.Code)
+	}
+}
+
+func TestRevokeSession_EmptySessionID(t *testing.T) {
+	handler := newTestHandler()
+
+	ctx := context.WithValue(context.Background(), "user_id", "550e8400-e29b-41d4-a716-446655440000")
+	body := models.RevokeSessionRequest{SessionID: ""}
+	bodyBytes, _ := json.Marshal(body)
+
+	req := httptest.NewRequest(http.MethodPost, "/sessions/revoke", bytes.NewBuffer(bodyBytes))
+	req = req.WithContext(ctx)
+	w := httptest.NewRecorder()
+
+	handler.RevokeSession(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("expected status %d, got %d", http.StatusBadRequest, w.Code)
+	}
+
+	var response models.ErrorResponse
+	json.NewDecoder(w.Body).Decode(&response)
+
+	if response.Error != "validation_error" {
+		t.Errorf("expected error 'validation_error', got '%s'", response.Error)
 	}
 }

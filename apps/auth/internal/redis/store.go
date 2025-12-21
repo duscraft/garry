@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -125,4 +126,109 @@ func (s *TokenStore) GetEmailVerificationToken(ctx context.Context, token string
 func (s *TokenStore) DeleteEmailVerificationToken(ctx context.Context, token string) error {
 	key := fmt.Sprintf("email_verify:%s", token)
 	return s.client.Del(ctx, key).Err()
+}
+
+type SessionData struct {
+	UserID    string `json:"user_id"`
+	UserAgent string `json:"user_agent"`
+	IPAddress string `json:"ip_address"`
+	CreatedAt int64  `json:"created_at"`
+	ExpiresAt int64  `json:"expires_at"`
+}
+
+func (s *TokenStore) StoreSession(ctx context.Context, userID uuid.UUID, sessionID, userAgent, ipAddress string, expiry time.Duration) error {
+	sessionKey := fmt.Sprintf("session:%s", sessionID)
+	userSessionsKey := fmt.Sprintf("user_sessions:%s", userID.String())
+
+	data := SessionData{
+		UserID:    userID.String(),
+		UserAgent: userAgent,
+		IPAddress: ipAddress,
+		CreatedAt: time.Now().Unix(),
+		ExpiresAt: time.Now().Add(expiry).Unix(),
+	}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	pipe := s.client.Pipeline()
+	pipe.Set(ctx, sessionKey, jsonData, expiry)
+	pipe.SAdd(ctx, userSessionsKey, sessionID)
+	pipe.Expire(ctx, userSessionsKey, expiry)
+
+	_, err = pipe.Exec(ctx)
+	return err
+}
+
+func (s *TokenStore) GetSession(ctx context.Context, sessionID string) (*SessionData, error) {
+	key := fmt.Sprintf("session:%s", sessionID)
+	data, err := s.client.Get(ctx, key).Result()
+	if err == redis.Nil {
+		return nil, fmt.Errorf("session not found or expired")
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var session SessionData
+	if err := json.Unmarshal([]byte(data), &session); err != nil {
+		return nil, err
+	}
+
+	return &session, nil
+}
+
+func (s *TokenStore) GetUserSessions(ctx context.Context, userID uuid.UUID) (map[string]*SessionData, error) {
+	userSessionsKey := fmt.Sprintf("user_sessions:%s", userID.String())
+	sessionIDs, err := s.client.SMembers(ctx, userSessionsKey).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	sessions := make(map[string]*SessionData)
+	for _, sessionID := range sessionIDs {
+		session, err := s.GetSession(ctx, sessionID)
+		if err != nil {
+			s.client.SRem(ctx, userSessionsKey, sessionID)
+			continue
+		}
+		sessions[sessionID] = session
+	}
+
+	return sessions, nil
+}
+
+func (s *TokenStore) DeleteSession(ctx context.Context, userID uuid.UUID, sessionID string) error {
+	sessionKey := fmt.Sprintf("session:%s", sessionID)
+	userSessionsKey := fmt.Sprintf("user_sessions:%s", userID.String())
+
+	pipe := s.client.Pipeline()
+	pipe.Del(ctx, sessionKey)
+	pipe.SRem(ctx, userSessionsKey, sessionID)
+
+	_, err := pipe.Exec(ctx)
+	return err
+}
+
+func (s *TokenStore) DeleteAllUserSessions(ctx context.Context, userID uuid.UUID) error {
+	userSessionsKey := fmt.Sprintf("user_sessions:%s", userID.String())
+	sessionIDs, err := s.client.SMembers(ctx, userSessionsKey).Result()
+	if err != nil {
+		return err
+	}
+
+	if len(sessionIDs) == 0 {
+		return nil
+	}
+
+	pipe := s.client.Pipeline()
+	for _, sessionID := range sessionIDs {
+		pipe.Del(ctx, fmt.Sprintf("session:%s", sessionID))
+	}
+	pipe.Del(ctx, userSessionsKey)
+
+	_, err = pipe.Exec(ctx)
+	return err
 }

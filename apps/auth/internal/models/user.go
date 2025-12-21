@@ -58,3 +58,28 @@ type ErrorResponse struct {
 type MessageResponse struct {
 	Message string `json:"message"`
 }
+
+type SendVerificationEmailRequest struct {
+	Email string `json:"email"`
+}
+
+type DeleteAccountRequest struct {
+	Password string `json:"password"`
+}
+
+type Session struct {
+	ID        string    `json:"id"`
+	UserAgent string    `json:"user_agent"`
+	IPAddress string    `json:"ip_address"`
+	CreatedAt time.Time `json:"created_at"`
+	ExpiresAt time.Time `json:"expires_at"`
+	Current   bool      `json:"current"`
+}
+
+type SessionsResponse struct {
+	Sessions []Session `json:"sessions"`
+}
+
+type RevokeSessionRequest struct {
+	SessionID string `json:"session_id"`
+}
