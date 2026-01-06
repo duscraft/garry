@@ -20,7 +20,7 @@ export default function Hero() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
               </span>
-              V 1.0 Available
+              {t('hero.badge')}
             </div>
           </motion.div>
           
@@ -72,15 +72,15 @@ export default function Hero() {
           >
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-blue-500" />
-              <span>Free tier</span>
+              <span>{t('hero.freeTier')}</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-blue-500" />
-              <span>No credit card</span>
+              <span>{t('hero.noCreditCard')}</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-blue-500" />
-              <span>Cancel anytime</span>
+              <span>{t('hero.cancelAnytime')}</span>
             </div>
           </motion.div>
         </div>

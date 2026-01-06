@@ -1,9 +1,16 @@
 {
+  "nav": {
+    "signIn": "Se connecter"
+  },
   "hero": {
     "title": "Ne perdez plus jamais une garantie",
     "subtitle": "Garry centralise vos factures et garanties. Recevez des rappels avant expiration et gardez l'esprit tranquille.",
     "cta": "Commencer gratuitement",
-    "secondary_cta": "Télécharger l'app"
+    "secondary_cta": "Télécharger l'app",
+    "badge": "V 1.0 Disponible",
+    "freeTier": "Gratuit",
+    "noCreditCard": "Sans carte bancaire",
+    "cancelAnytime": "Annulez quand vous voulez"
   },
   "features": {
     "title": "Tout ce dont vous avez besoin",
@@ -28,7 +35,20 @@
   "app": {
     "title": "Garry partout avec vous",
     "subtitle": "Disponible sur iOS, Android et Web. Vos données sont synchronisées en temps réel.",
-    "web_btn": "Ouvrir l'application Web"
+    "web_btn": "Ouvrir l'application Web",
+    "downloadOn": "Télécharger sur",
+    "appStore": "App Store",
+    "getItOn": "Disponible sur",
+    "googlePlay": "Google Play",
+    "mockup": {
+      "hello": "Bonjour,",
+      "valid": "Valide",
+      "expiring": "Expire bientôt",
+      "expired": "Expirée",
+      "expiresIn2Years": "Expire dans 2 ans",
+      "expiresIn15Days": "Expire dans 15 jours",
+      "expired2MonthsAgo": "Expirée depuis 2 mois"
+    }
   },
   "footer": {
     "copyright": "© 2026 Garry. Tous droits réservés.",

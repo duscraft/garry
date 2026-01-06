@@ -1,9 +1,16 @@
 {
+  "nav": {
+    "signIn": "Sign In"
+  },
   "hero": {
     "title": "Never lose a warranty again",
     "subtitle": "Garry centralizes your invoices and warranties. Get reminders before expiration and keep peace of mind.",
     "cta": "Start for free",
-    "secondary_cta": "Download App"
+    "secondary_cta": "Download App",
+    "badge": "V 1.0 Available",
+    "freeTier": "Free tier",
+    "noCreditCard": "No credit card",
+    "cancelAnytime": "Cancel anytime"
   },
   "features": {
     "title": "Everything you need",
@@ -28,7 +35,20 @@
   "app": {
     "title": "Garry everywhere with you",
     "subtitle": "Available on iOS, Android and Web. Your data is synced in real-time.",
-    "web_btn": "Open Web App"
+    "web_btn": "Open Web App",
+    "downloadOn": "Download on the",
+    "appStore": "App Store",
+    "getItOn": "Get it on",
+    "googlePlay": "Google Play",
+    "mockup": {
+      "hello": "Hello,",
+      "valid": "Valid",
+      "expiring": "Expiring",
+      "expired": "Expired",
+      "expiresIn2Years": "Expires in 2 years",
+      "expiresIn15Days": "Expires in 15 days",
+      "expired2MonthsAgo": "Expired 2 months ago"
+    }
   },
   "footer": {
     "copyright": "© 2026 Garry. All rights reserved.",

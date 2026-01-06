@@ -40,15 +40,15 @@ export default function AppDownload() {
               <a href="#" className="flex items-center gap-3 bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl transition-all w-fit">
                 <Smartphone className="w-8 h-8" />
                 <div className="flex flex-col items-start">
-                  <span className="text-xs text-slate-300">Download on the</span>
-                  <span className="text-lg font-bold leading-none">App Store</span>
+                  <span className="text-xs text-slate-300">{t('app.downloadOn')}</span>
+                  <span className="text-lg font-bold leading-none">{t('app.appStore')}</span>
                 </div>
               </a>
 
               <a href="#" className="flex items-center gap-3 bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl transition-all w-fit">
                 <div className="flex flex-col items-start">
-                  <span className="text-xs text-slate-300">Get it on</span>
-                  <span className="text-lg font-bold leading-none">Google Play</span>
+                  <span className="text-xs text-slate-300">{t('app.getItOn')}</span>
+                  <span className="text-lg font-bold leading-none">{t('app.googlePlay')}</span>
                 </div>
               </a>
             </motion.div>
@@ -85,30 +85,30 @@ export default function AppDownload() {
               <div className="rounded-[2rem] overflow-hidden w-[272px] h-[572px] bg-white dark:bg-slate-950">
                 <div className="flex flex-col h-full">
                     <div className="bg-blue-600 p-6 pt-12 text-white">
-                        <div className="text-sm opacity-80">Hello,</div>
+                        <div className="text-sm opacity-80">{t('app.mockup.hello')}</div>
                         <div className="text-2xl font-bold">Antoine</div>
                     </div>
                     <div className="p-4 flex-1 bg-slate-50 dark:bg-slate-900">
                         <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm mb-4 border border-slate-100 dark:border-slate-700">
                             <div className="flex justify-between items-start mb-2">
                                 <div className="font-bold text-slate-900 dark:text-white">MacBook Pro M3</div>
-                                <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">Valid</span>
+                                <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">{t('app.mockup.valid')}</span>
                             </div>
-                            <div className="text-sm text-slate-500">Expires in 2 years</div>
+                            <div className="text-sm text-slate-500">{t('app.mockup.expiresIn2Years')}</div>
                         </div>
                         <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm mb-4 border border-slate-100 dark:border-slate-700">
                             <div className="flex justify-between items-start mb-2">
                                 <div className="font-bold text-slate-900 dark:text-white">Sony WH-1000XM5</div>
-                                <span className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full">Expiring</span>
+                                <span className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full">{t('app.mockup.expiring')}</span>
                             </div>
-                            <div className="text-sm text-slate-500">Expires in 15 days</div>
+                            <div className="text-sm text-slate-500">{t('app.mockup.expiresIn15Days')}</div>
                         </div>
                          <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm mb-4 border border-slate-100 dark:border-slate-700 opacity-60">
                             <div className="flex justify-between items-start mb-2">
                                 <div className="font-bold text-slate-900 dark:text-white">AirPods Pro</div>
-                                <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">Expired</span>
+                                <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">{t('app.mockup.expired')}</span>
                             </div>
-                            <div className="text-sm text-slate-500">Expired 2 months ago</div>
+                            <div className="text-sm text-slate-500">{t('app.mockup.expired2MonthsAgo')}</div>
                         </div>
                     </div>
                 </div>

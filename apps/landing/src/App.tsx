@@ -1,4 +1,5 @@
 import { Shield, Moon, Sun } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import Hero from './components/Hero';
 import Features from './components/Features';
 import AppDownload from './components/AppDownload';
@@ -8,6 +9,7 @@ import { useTheme } from './context/ThemeContext';
 
 function Navbar() {
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <nav className="fixed w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors duration-300">
@@ -30,7 +32,7 @@ function Navbar() {
               href="https://garry-app.antoinelaborderie.com"
               className="hidden sm:block px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-sm font-medium hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
             >
-              Sign In
+              {t('nav.signIn')}
             </a>
           </div>
         </div>
