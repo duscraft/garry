@@ -2,6 +2,13 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Build arguments for production API URLs
+ARG VITE_API_URL=http://localhost:8080/api/v1
+ARG VITE_AUTH_URL=http://localhost:8081/api/v1
+
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_AUTH_URL=$VITE_AUTH_URL
+
 COPY package*.json ./
 RUN npm ci
 
