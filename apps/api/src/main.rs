@@ -17,7 +17,9 @@ use axum::{
 };
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
-use tower_governor::{governor::GovernorConfigBuilder, key_extractor::PeerIpKeyExtractor, GovernorLayer};
+use tower_governor::{
+    governor::GovernorConfigBuilder, key_extractor::PeerIpKeyExtractor, GovernorLayer,
+};
 use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 use tracing::{info, Span};
@@ -196,7 +198,12 @@ async fn main() {
     info!(address = %addr, "listening");
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
-    axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>()).await.unwrap();
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .await
+    .unwrap();
 }
 
 fn build_cors_layer(config: &Config) -> CorsLayer {
@@ -276,10 +283,7 @@ struct HealthChecks {
     )
 )]
 async fn health_check(State(state): State<AppState>) -> (StatusCode, Json<HealthResponse>) {
-    let db_healthy = sqlx::query("SELECT 1")
-        .fetch_one(&state.pool)
-        .await
-        .is_ok();
+    let db_healthy = sqlx::query("SELECT 1").fetch_one(&state.pool).await.is_ok();
 
     let status = if db_healthy { "healthy" } else { "unhealthy" };
     let http_status = if db_healthy {
@@ -430,9 +434,7 @@ async fn create_warranty(
 
 fn validate_create_warranty(req: &CreateWarrantyRequest) -> Result<()> {
     if req.product_name.trim().is_empty() {
-        return Err(AppError::BadRequest(
-            "Product name is required".to_string(),
-        ));
+        return Err(AppError::BadRequest("Product name is required".to_string()));
     }
     if req.product_name.len() > 200 {
         return Err(AppError::BadRequest(

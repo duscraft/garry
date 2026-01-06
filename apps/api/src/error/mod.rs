@@ -33,11 +33,23 @@ impl IntoResponse for AppError {
         let (status, error_code, message) = match &self {
             AppError::NotFound(msg) => (StatusCode::NOT_FOUND, "not_found", msg.clone()),
             AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, "bad_request", msg.clone()),
-            AppError::Unauthorized => (StatusCode::UNAUTHORIZED, "unauthorized", "Invalid or missing authentication".to_string()),
-            AppError::TooManyRequests => (StatusCode::TOO_MANY_REQUESTS, "too_many_requests", "Rate limit exceeded. Please try again later.".to_string()),
+            AppError::Unauthorized => (
+                StatusCode::UNAUTHORIZED,
+                "unauthorized",
+                "Invalid or missing authentication".to_string(),
+            ),
+            AppError::TooManyRequests => (
+                StatusCode::TOO_MANY_REQUESTS,
+                "too_many_requests",
+                "Rate limit exceeded. Please try again later.".to_string(),
+            ),
             AppError::Database(e) => {
                 tracing::error!("Database error: {:?}", e);
-                (StatusCode::INTERNAL_SERVER_ERROR, "database_error", "Database operation failed".to_string())
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "database_error",
+                    "Database operation failed".to_string(),
+                )
             }
         };
 

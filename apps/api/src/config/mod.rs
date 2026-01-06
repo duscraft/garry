@@ -27,15 +27,17 @@ impl Config {
         };
 
         let jwt_secret = match environment {
-            Environment::Production => env::var("JWT_SECRET")
-                .expect("JWT_SECRET must be set in production"),
+            Environment::Production => {
+                env::var("JWT_SECRET").expect("JWT_SECRET must be set in production")
+            }
             Environment::Development => env::var("JWT_SECRET")
                 .unwrap_or_else(|_| "garry-dev-secret-change-in-production".to_string()),
         };
 
         let database_url = match environment {
-            Environment::Production => env::var("DATABASE_URL")
-                .expect("DATABASE_URL must be set in production"),
+            Environment::Production => {
+                env::var("DATABASE_URL").expect("DATABASE_URL must be set in production")
+            }
             Environment::Development => env::var("DATABASE_URL")
                 .unwrap_or_else(|_| "postgres://garry:garry@localhost:5432/garry".to_string()),
         };
@@ -53,8 +55,7 @@ impl Config {
                 .unwrap_or_else(|_| "8080".to_string())
                 .parse()
                 .unwrap_or(8080),
-            upload_dir: env::var("UPLOAD_DIR")
-                .unwrap_or_else(|_| "./uploads".to_string()),
+            upload_dir: env::var("UPLOAD_DIR").unwrap_or_else(|_| "./uploads".to_string()),
             cors_origins,
             environment,
         }

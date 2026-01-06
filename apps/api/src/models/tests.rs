@@ -1,6 +1,8 @@
 #[cfg(test)]
 mod tests {
-    use crate::models::{WarrantyCategory, CreateWarrantyRequest, UpdateWarrantyRequest, WarrantyFilters};
+    use crate::models::{
+        CreateWarrantyRequest, UpdateWarrantyRequest, WarrantyCategory, WarrantyFilters,
+    };
     use chrono::{Duration, Utc};
 
     #[test]
@@ -16,8 +18,14 @@ mod tests {
 
     #[test]
     fn test_warranty_category_display_name_fr() {
-        assert_eq!(WarrantyCategory::Electronics.display_name_fr(), "Électronique");
-        assert_eq!(WarrantyCategory::Appliances.display_name_fr(), "Électroménager");
+        assert_eq!(
+            WarrantyCategory::Electronics.display_name_fr(),
+            "Électronique"
+        );
+        assert_eq!(
+            WarrantyCategory::Appliances.display_name_fr(),
+            "Électroménager"
+        );
         assert_eq!(WarrantyCategory::Furniture.display_name_fr(), "Mobilier");
         assert_eq!(WarrantyCategory::Clothing.display_name_fr(), "Vêtements");
         assert_eq!(WarrantyCategory::Automotive.display_name_fr(), "Automobile");
@@ -30,7 +38,7 @@ mod tests {
         let category = WarrantyCategory::Electronics;
         let json = serde_json::to_string(&category).unwrap();
         assert_eq!(json, "\"electronics\"");
-        
+
         let deserialized: WarrantyCategory = serde_json::from_str(&json).unwrap();
         assert_eq!(deserialized, WarrantyCategory::Electronics);
     }
@@ -46,7 +54,7 @@ mod tests {
             store: Some("Apple Store".to_string()),
             notes: None,
         };
-        
+
         let json = serde_json::to_string(&request).unwrap();
         assert!(json.contains("iPhone 15"));
         assert!(json.contains("Apple"));
@@ -63,7 +71,7 @@ mod tests {
             "warranty_months": 36,
             "store": "Apple Store"
         }"#;
-        
+
         let request: CreateWarrantyRequest = serde_json::from_str(json).unwrap();
         assert_eq!(request.product_name, "MacBook Pro");
         assert_eq!(request.brand, Some("Apple".to_string()));
@@ -78,7 +86,7 @@ mod tests {
             "category": "other",
             "purchase_date": "2024-01-15T10:00:00Z"
         }"#;
-        
+
         let request: CreateWarrantyRequest = serde_json::from_str(json).unwrap();
         assert_eq!(request.product_name, "Test Product");
         assert_eq!(request.brand, None);
@@ -90,7 +98,7 @@ mod tests {
     #[test]
     fn test_update_warranty_request_partial() {
         let json = r#"{"product_name": "Updated Name"}"#;
-        
+
         let request: UpdateWarrantyRequest = serde_json::from_str(json).unwrap();
         assert_eq!(request.product_name, Some("Updated Name".to_string()));
         assert_eq!(request.brand, None);
@@ -111,7 +119,7 @@ mod tests {
         let purchase_date = Utc::now();
         let warranty_months = 24;
         let expected_end = purchase_date + Duration::days(warranty_months as i64 * 30);
-        
+
         let days_diff = (expected_end - purchase_date).num_days();
         assert_eq!(days_diff, 720);
     }
@@ -127,7 +135,7 @@ mod tests {
             WarrantyCategory::Sports,
             WarrantyCategory::Other,
         ];
-        
+
         assert_eq!(categories.len(), 7);
     }
 }
