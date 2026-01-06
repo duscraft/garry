@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.duscraft.garry.data.model.Warranty
 import com.duscraft.garry.data.model.WarrantyStatus
 import com.duscraft.garry.data.repository.WarrantyRepository
+import com.duscraft.garry.i18n.LocaleManager
 import com.duscraft.garry.ui.components.ErrorMessage
 import com.duscraft.garry.ui.components.LoadingIndicator
 import com.duscraft.garry.ui.components.StatusBadge
@@ -34,6 +35,7 @@ fun WarrantyDetailScreen(
     onEditClick: (String) -> Unit,
     onDeleteSuccess: () -> Unit
 ) {
+    val strings = LocaleManager.strings
     var warranty by remember { mutableStateOf<Warranty?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -47,7 +49,7 @@ fun WarrantyDetailScreen(
             error = null
             warrantyRepository.getWarranty(warrantyId).fold(
                 onSuccess = { warranty = it },
-                onFailure = { error = it.message ?: "Impossible de charger les détails de la garantie" }
+                onFailure = { error = it.message ?: strings.loadError }
             )
             isLoading = false
         }
@@ -60,18 +62,18 @@ fun WarrantyDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Détails") },
+                title = { Text(strings.details) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.Default.ArrowBack, contentDescription = strings.back)
                     }
                 },
                 actions = {
                     IconButton(onClick = { onEditClick(warrantyId) }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Modifier")
+                        Icon(Icons.Default.Edit, contentDescription = strings.edit)
                     }
                     IconButton(onClick = { showDeleteDialog = true }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Supprimer")
+                        Icon(Icons.Default.Delete, contentDescription = strings.delete)
                     }
                 }
             )
@@ -87,7 +89,6 @@ fun WarrantyDetailScreen(
             )
         } else {
             warranty?.let { w ->
-                // Determine status
                 val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
                 val endDate = LocalDate.parse(w.warrantyEndDate)
                 val daysRemaining = today.daysUntil(endDate)
@@ -105,7 +106,6 @@ fun WarrantyDetailScreen(
                         .verticalScroll(rememberScrollState())
                         .padding(16.dp)
                 ) {
-                    // Header Card
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
@@ -147,19 +147,18 @@ fun WarrantyDetailScreen(
                     
                     Spacer(modifier = Modifier.height(24.dp))
                     
-                    // Details
-                    DetailRow("Magasin", w.store)
+                    DetailRow(strings.store, w.store)
                     Divider()
-                    DetailRow("Date d'achat", w.purchaseDate)
+                    DetailRow(strings.purchaseDate, w.purchaseDate)
                     Divider()
-                    DetailRow("Fin de garantie", w.warrantyEndDate)
+                    DetailRow(strings.warrantyEnd, w.warrantyEndDate)
                     Divider()
-                    DetailRow("Durée", "${w.warrantyMonths} mois")
+                    DetailRow(strings.duration, "${w.warrantyMonths} ${strings.months}")
                     
                     if (!w.notes.isNullOrEmpty()) {
                         Spacer(modifier = Modifier.height(24.dp))
                         Text(
-                            text = "Notes",
+                            text = strings.notes,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -176,8 +175,8 @@ fun WarrantyDetailScreen(
         if (showDeleteDialog) {
             AlertDialog(
                 onDismissRequest = { showDeleteDialog = false },
-                title = { Text("Supprimer la garantie ?") },
-                text = { Text("Cette action est irréversible. Voulez-vous vraiment supprimer cette garantie ?") },
+                title = { Text(strings.deleteTitle) },
+                text = { Text(strings.deleteConfirm) },
                 confirmButton = {
                     TextButton(
                         onClick = {
@@ -193,12 +192,12 @@ fun WarrantyDetailScreen(
                             contentColor = MaterialTheme.colorScheme.error
                         )
                     ) {
-                        Text("Supprimer")
+                        Text(strings.delete)
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { showDeleteDialog = false }) {
-                        Text("Annuler")
+                        Text(strings.cancel)
                     }
                 }
             )

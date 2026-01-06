@@ -13,6 +13,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.duscraft.garry.data.model.WarrantyCategory
 import com.duscraft.garry.data.repository.WarrantyRepository
+import com.duscraft.garry.i18n.LocaleManager
 import com.duscraft.garry.ui.components.CategoryDropdown
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -26,6 +27,7 @@ fun AddWarrantyScreen(
     onBackClick: () -> Unit,
     onSaveSuccess: () -> Unit
 ) {
+    val strings = LocaleManager.strings
     var productName by remember { mutableStateOf("") }
     var brand by remember { mutableStateOf("") }
     var category by remember { mutableStateOf<WarrantyCategory?>(null) }
@@ -34,7 +36,6 @@ fun AddWarrantyScreen(
     var store by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
     
-    // Default to today's date if empty
     LaunchedEffect(Unit) {
         val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
         purchaseDate = today.toString()
@@ -48,10 +49,10 @@ fun AddWarrantyScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Ajouter une garantie") },
+                title = { Text(strings.addWarranty) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.Default.ArrowBack, contentDescription = strings.back)
                     }
                 }
             )
@@ -67,7 +68,7 @@ fun AddWarrantyScreen(
             OutlinedTextField(
                 value = productName,
                 onValueChange = { productName = it },
-                label = { Text("Nom du produit") },
+                label = { Text(strings.productName) },
                 modifier = Modifier.fillMaxWidth()
             )
             
@@ -76,7 +77,7 @@ fun AddWarrantyScreen(
             OutlinedTextField(
                 value = brand,
                 onValueChange = { brand = it },
-                label = { Text("Marque") },
+                label = { Text(strings.brand) },
                 modifier = Modifier.fillMaxWidth()
             )
             
@@ -93,7 +94,7 @@ fun AddWarrantyScreen(
             OutlinedTextField(
                 value = purchaseDate,
                 onValueChange = { purchaseDate = it },
-                label = { Text("Date d'achat (YYYY-MM-DD)") },
+                label = { Text(strings.purchaseDateFormat) },
                 modifier = Modifier.fillMaxWidth()
             )
             
@@ -102,7 +103,7 @@ fun AddWarrantyScreen(
             OutlinedTextField(
                 value = warrantyMonths,
                 onValueChange = { if (it.all { char -> char.isDigit() }) warrantyMonths = it },
-                label = { Text("Durée de garantie (mois)") },
+                label = { Text(strings.warrantyDuration) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
@@ -112,7 +113,7 @@ fun AddWarrantyScreen(
             OutlinedTextField(
                 value = store,
                 onValueChange = { store = it },
-                label = { Text("Magasin") },
+                label = { Text(strings.store) },
                 modifier = Modifier.fillMaxWidth()
             )
             
@@ -121,7 +122,7 @@ fun AddWarrantyScreen(
             OutlinedTextField(
                 value = notes,
                 onValueChange = { notes = it },
-                label = { Text("Notes (optionnel)") },
+                label = { Text(strings.notesOptional) },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3
             )
@@ -141,7 +142,7 @@ fun AddWarrantyScreen(
                 onClick = {
                     if (productName.isBlank() || brand.isBlank() || category == null || 
                         purchaseDate.isBlank() || warrantyMonths.isBlank() || store.isBlank()) {
-                        error = "Veuillez remplir tous les champs obligatoires"
+                        error = strings.fillAllFields
                         return@Button
                     }
                     
@@ -159,7 +160,7 @@ fun AddWarrantyScreen(
                             notes = if (notes.isBlank()) null else notes
                         ).fold(
                             onSuccess = { onSaveSuccess() },
-                            onFailure = { error = "Erreur lors de l'enregistrement: ${it.message}" }
+                            onFailure = { error = "${strings.saveError}: ${it.message}" }
                         )
                         isLoading = false
                     }
@@ -173,7 +174,7 @@ fun AddWarrantyScreen(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Text("Enregistrer")
+                    Text(strings.save)
                 }
             }
         }

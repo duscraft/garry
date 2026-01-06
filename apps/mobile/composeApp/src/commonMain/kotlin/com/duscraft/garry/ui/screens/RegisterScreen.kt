@@ -15,6 +15,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.duscraft.garry.data.repository.AuthRepository
+import com.duscraft.garry.i18n.LocaleManager
 import com.duscraft.garry.ui.theme.PrimaryBlue
 import com.duscraft.garry.ui.theme.Slate900
 import kotlinx.coroutines.launch
@@ -25,6 +26,7 @@ fun RegisterScreen(
     onRegisterSuccess: () -> Unit,
     onLoginClick: () -> Unit
 ) {
+    val strings = LocaleManager.strings
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -57,7 +59,7 @@ fun RegisterScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Inscription",
+                    text = strings.register,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Slate900
@@ -68,7 +70,7 @@ fun RegisterScreen(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Nom complet") },
+                    label = { Text(strings.fullName) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
@@ -77,7 +79,7 @@ fun RegisterScreen(
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    label = { Text("Email") },
+                    label = { Text(strings.email) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -87,7 +89,7 @@ fun RegisterScreen(
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Mot de passe") },
+                    label = { Text(strings.password) },
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -112,7 +114,7 @@ fun RegisterScreen(
                                 authRepository.register(name, email, password)
                                 onRegisterSuccess()
                             } catch (e: Exception) {
-                                error = "Échec de l'inscription. Veuillez réessayer."
+                                error = strings.registerError
                             } finally {
                                 isLoading = false
                             }
@@ -127,14 +129,14 @@ fun RegisterScreen(
                             color = Color.White
                         )
                     } else {
-                        Text("S'inscrire")
+                        Text(strings.registerButton)
                     }
                 }
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 TextButton(onClick = onLoginClick) {
-                    Text("Déjà un compte ? Se connecter")
+                    Text(strings.hasAccount)
                 }
             }
         }

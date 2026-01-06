@@ -1,0 +1,38 @@
+{
+  "hero": {
+    "title": "Never lose a warranty again",
+    "subtitle": "Garry centralizes your invoices and warranties. Get reminders before expiration and keep peace of mind.",
+    "cta": "Start for free",
+    "secondary_cta": "Download App"
+  },
+  "features": {
+    "title": "Everything you need",
+    "subtitle": "A complete suite of tools to manage your purchases with peace of mind",
+    "scan": {
+      "title": "Smart Scan",
+      "description": "Snap a photo of your invoices, Garry automatically extracts key information."
+    },
+    "reminders": {
+      "title": "Automatic Reminders",
+      "description": "Get notified before your warranties expire so you never miss a repair opportunity."
+    },
+    "secure": {
+      "title": "Secure Storage",
+      "description": "Your documents are encrypted and safely stored. Accessible anywhere, anytime."
+    },
+    "search": {
+      "title": "Instant Search",
+      "description": "Find any invoice in seconds thanks to powerful search capabilities."
+    }
+  },
+  "app": {
+    "title": "Garry everywhere with you",
+    "subtitle": "Available on iOS, Android and Web. Your data is synced in real-time.",
+    "web_btn": "Open Web App"
+  },
+  "footer": {
+    "copyright": "© 2024 Garry. All rights reserved.",
+    "legal": "Legal Notice",
+    "privacy": "Privacy Policy"
+  }
+}

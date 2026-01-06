@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { CreateWarrantyRequest, Warranty } from '../types';
 import Navbar from '../components/Navbar';
@@ -7,6 +8,7 @@ import WarrantyForm from '../components/WarrantyForm';
 import { ArrowLeft } from 'lucide-react';
 
 const EditWarrantyPage: React.FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -31,7 +33,7 @@ const EditWarrantyPage: React.FC = () => {
         });
       } catch (err: any) {
         console.error(err);
-        setError('Impossible de charger la garantie');
+        setError(t('common.error'));
       } finally {
         setFetching(false);
       }
@@ -40,7 +42,7 @@ const EditWarrantyPage: React.FC = () => {
     if (id) {
       fetchWarranty();
     }
-  }, [id]);
+  }, [id, t]);
 
   const handleSubmit = async (data: CreateWarrantyRequest) => {
     setLoading(true);
@@ -54,7 +56,7 @@ const EditWarrantyPage: React.FC = () => {
       navigate(`/warranty/${id}`);
     } catch (err: any) {
       console.error(err);
-      setError(err.message || 'Impossible de modifier la garantie');
+      setError(err.message || t('common.error'));
     } finally {
       setLoading(false);
     }
@@ -62,27 +64,27 @@ const EditWarrantyPage: React.FC = () => {
 
   if (fetching) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center transition-colors duration-200">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-200">
       <Navbar />
       
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
-          <Link to={`/warranty/${id}`} className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 mb-4">
+          <Link to={`/warranty/${id}`} className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 mb-4 transition-colors duration-200">
             <ArrowLeft className="w-4 h-4 mr-1" />
-            Retour aux détails
+            {t('warranty.backToDashboard')}
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Modifier la garantie</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('pages.editWarranty')}</h1>
         </div>
 
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4 text-red-700 text-sm">
+          <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4 text-red-700 dark:text-red-200 text-sm">
             {error}
           </div>
         )}

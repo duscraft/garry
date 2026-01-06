@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.duscraft.garry.data.model.Warranty
 import com.duscraft.garry.data.repository.AuthRepository
 import com.duscraft.garry.data.repository.WarrantyRepository
+import com.duscraft.garry.i18n.LocaleManager
 import com.duscraft.garry.ui.components.ErrorMessage
 import com.duscraft.garry.ui.components.LoadingIndicator
 import com.duscraft.garry.ui.components.StatsCard
@@ -33,6 +34,7 @@ fun DashboardScreen(
     onWarrantyClick: (String) -> Unit,
     onLogout: () -> Unit
 ) {
+    val strings = LocaleManager.strings
     var warranties by remember { mutableStateOf<List<Warranty>>(emptyList()) }
     var stats by remember { mutableStateOf<com.duscraft.garry.data.model.Stats?>(null) }
     var isLoading by remember { mutableStateOf(true) }
@@ -79,7 +81,7 @@ fun DashboardScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Tableau de bord") },
+                title = { Text(strings.dashboard) },
                 actions = {
                     IconButton(onClick = {
                         scope.launch {
@@ -87,14 +89,14 @@ fun DashboardScreen(
                             onLogout()
                         }
                     }) {
-                        Icon(Icons.Default.ExitToApp, contentDescription = "Déconnexion")
+                        Icon(Icons.Default.ExitToApp, contentDescription = strings.logout)
                     }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddWarrantyClick) {
-                Icon(Icons.Default.Add, contentDescription = "Ajouter une garantie")
+                Icon(Icons.Default.Add, contentDescription = strings.addWarranty)
             }
         }
     ) { paddingValues ->
@@ -125,7 +127,7 @@ fun DashboardScreen(
                     
                     item {
                         Text(
-                            text = "Vos garanties",
+                            text = strings.yourWarranties,
                             style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
@@ -144,12 +146,12 @@ fun DashboardScreen(
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
-                                        text = "Aucune garantie enregistrée",
+                                        text = strings.noWarranties,
                                         style = MaterialTheme.typography.bodyLarge
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Text(
-                                        text = "Appuyez sur + pour ajouter votre première garantie",
+                                        text = strings.noWarrantiesHint,
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

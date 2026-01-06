@@ -13,6 +13,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.duscraft.garry.data.model.WarrantyCategory
 import com.duscraft.garry.data.repository.WarrantyRepository
+import com.duscraft.garry.i18n.LocaleManager
 import com.duscraft.garry.ui.components.CategoryDropdown
 import com.duscraft.garry.ui.components.ErrorMessage
 import com.duscraft.garry.ui.components.LoadingIndicator
@@ -26,6 +27,7 @@ fun EditWarrantyScreen(
     onBackClick: () -> Unit,
     onSaveSuccess: () -> Unit
 ) {
+    val strings = LocaleManager.strings
     var productName by remember { mutableStateOf("") }
     var brand by remember { mutableStateOf("") }
     var category by remember { mutableStateOf<WarrantyCategory?>(null) }
@@ -40,7 +42,6 @@ fun EditWarrantyScreen(
     
     val scope = rememberCoroutineScope()
 
-    // Load existing data
     LaunchedEffect(warrantyId) {
         isLoading = true
         error = null
@@ -54,7 +55,7 @@ fun EditWarrantyScreen(
                 store = warranty.store
                 notes = warranty.notes ?: ""
             },
-            onFailure = { error = "Impossible de charger les données" }
+            onFailure = { error = strings.loadError }
         )
         isLoading = false
     }
@@ -62,10 +63,10 @@ fun EditWarrantyScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Modifier la garantie") },
+                title = { Text(strings.edit) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.Default.ArrowBack, contentDescription = strings.back)
                     }
                 }
             )
@@ -76,7 +77,7 @@ fun EditWarrantyScreen(
         } else if (error != null) {
             ErrorMessage(
                 message = error!!,
-                onRetry = { /* Retry logic could be added here */ },
+                onRetry = { },
                 modifier = Modifier.padding(paddingValues)
             )
         } else {
@@ -90,7 +91,7 @@ fun EditWarrantyScreen(
                 OutlinedTextField(
                     value = productName,
                     onValueChange = { productName = it },
-                    label = { Text("Nom du produit") },
+                    label = { Text(strings.productName) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
@@ -99,7 +100,7 @@ fun EditWarrantyScreen(
                 OutlinedTextField(
                     value = brand,
                     onValueChange = { brand = it },
-                    label = { Text("Marque") },
+                    label = { Text(strings.brand) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
@@ -116,7 +117,7 @@ fun EditWarrantyScreen(
                 OutlinedTextField(
                     value = purchaseDate,
                     onValueChange = { purchaseDate = it },
-                    label = { Text("Date d'achat (YYYY-MM-DD)") },
+                    label = { Text(strings.purchaseDateFormat) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
@@ -125,7 +126,7 @@ fun EditWarrantyScreen(
                 OutlinedTextField(
                     value = warrantyMonths,
                     onValueChange = { if (it.all { char -> char.isDigit() }) warrantyMonths = it },
-                    label = { Text("Durée de garantie (mois)") },
+                    label = { Text(strings.warrantyDuration) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -135,7 +136,7 @@ fun EditWarrantyScreen(
                 OutlinedTextField(
                     value = store,
                     onValueChange = { store = it },
-                    label = { Text("Magasin") },
+                    label = { Text(strings.store) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
@@ -144,7 +145,7 @@ fun EditWarrantyScreen(
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
-                    label = { Text("Notes (optionnel)") },
+                    label = { Text(strings.notesOptional) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3
                 )
@@ -155,7 +156,6 @@ fun EditWarrantyScreen(
                     onClick = {
                         if (productName.isBlank() || brand.isBlank() || category == null || 
                             purchaseDate.isBlank() || warrantyMonths.isBlank() || store.isBlank()) {
-                            // Ideally show snackbar
                             return@Button
                         }
                         
@@ -187,7 +187,7 @@ fun EditWarrantyScreen(
                             color = MaterialTheme.colorScheme.onPrimary
                         )
                     } else {
-                        Text("Mettre à jour")
+                        Text(strings.save)
                     }
                 }
             }

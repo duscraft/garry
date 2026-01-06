@@ -15,19 +15,107 @@
     "addWarranty": "Ajouter une garantie",
     "loading": "Chargement...",
     "error": "Impossible de charger les données",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "distribution": "Répartition"
   },
   "nav": {
     "dashboard": "Tableau de bord",
     "add": "Ajouter",
     "logout": "Déconnexion",
-    "profile": "Profil"
+    "profile": "Profil",
+    "addWarranty": "Ajouter une garantie",
+    "lightMode": "Passer en mode clair",
+    "darkMode": "Passer en mode sombre"
+  },
+  "auth": {
+    "login": "Connexion",
+    "register": "Créer un compte",
+    "email": "Adresse email",
+    "password": "Mot de passe",
+    "name": "Nom complet",
+    "loginButton": "Se connecter",
+    "registerButton": "S'inscrire",
+    "loggingIn": "Connexion en cours...",
+    "registering": "Inscription en cours...",
+    "noAccount": "Ou",
+    "createAccount": "créez un compte gratuitement",
+    "hasAccount": "connectez-vous à votre compte",
+    "loginError": "Email ou mot de passe incorrect",
+    "registerError": "Erreur lors de l'inscription",
+    "minPassword": "Minimum 8 caractères"
+  },
+  "warranty": {
+    "details": "Détails de la garantie",
+    "fullInfo": "Informations complètes sur votre produit.",
+    "backToDashboard": "Retour au tableau de bord",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette garantie ?",
+    "deleteError": "Erreur lors de la suppression",
+    "notFound": "Garantie introuvable",
+    "error": "Erreur"
+  },
+  "form": {
+    "productInfo": "Informations du produit",
+    "productInfoDesc": "Détails essentiels pour identifier votre garantie.",
+    "warrantyDetails": "Détails de la garantie",
+    "warrantyDetailsDesc": "Dates et informations d'achat.",
+    "productName": "Nom du produit",
+    "brand": "Marque",
+    "category": "Catégorie",
+    "selectCategory": "Sélectionner une catégorie",
+    "store": "Magasin / Site web",
+    "purchaseDate": "Date d'achat",
+    "warrantyMonths": "Durée de garantie (mois)",
+    "warrantyMonthsHint": "24 mois = 2 ans (garantie légale standard)",
+    "notes": "Notes (optionnel)",
+    "notesPlaceholder": "Numéro de série, conditions particulières, etc.",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "saving": "Enregistrement..."
+  },
+  "categories": {
+    "appliances": "Électroménager",
+    "highTech": "High-Tech",
+    "audioVideo": "Audio & Vidéo",
+    "home": "Maison",
+    "diy": "Bricolage",
+    "fashion": "Mode",
+    "sports": "Sport",
+    "other": "Autre"
+  },
+  "fields": {
+    "category": "Catégorie",
+    "store": "Magasin",
+    "purchaseDate": "Date d'achat",
+    "warrantyEnd": "Fin de garantie",
+    "notes": "Notes",
+    "months": "mois"
+  },
+  "pages": {
+    "addWarranty": "Ajouter une garantie",
+    "addWarrantyDesc": "Enregistrez une nouvelle garantie pour ne jamais la perdre.",
+    "editWarranty": "Modifier la garantie",
+    "editWarrantyDesc": "Mettez à jour les informations de votre garantie."
+  },
+  "status": {
+    "active": "Active",
+    "expiringSoon": "Expire bientôt",
+    "expired": "Expirée",
+    "daysRemaining": "{{days}} jours restants",
+    "daysExpired": "Expirée depuis {{days}} jours"
   },
   "common": {
     "save": "Enregistrer",
     "cancel": "Annuler",
     "delete": "Supprimer",
     "edit": "Modifier",
-    "view": "Voir"
+    "view": "Voir",
+    "loading": "Chargement...",
+    "error": "Erreur"
+  },
+  "language": {
+    "fr": "Français",
+    "en": "English"
   }
 }

@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 font-sans;
+    @apply bg-slate-50 text-slate-900 font-sans dark:bg-slate-900 dark:text-slate-100 transition-colors duration-200;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -13,11 +13,11 @@
 }
 
 .gradient-text {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-accent-600;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-accent-600 dark:from-primary-400 dark:to-accent-400;
 }
 
 .glass-card {
-  @apply bg-white/70 backdrop-blur-lg border border-white/20 shadow-xl;
+  @apply bg-white/70 backdrop-blur-lg border border-white/20 shadow-xl dark:bg-slate-800/70 dark:border-slate-700/30;
 }
 
 .floating-element {
