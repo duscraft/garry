@@ -375,7 +375,7 @@ async fn list_warranties(
         .ok_or(AppError::Unauthorized)?;
 
     let page = filters.page.unwrap_or(1).max(1);
-    let per_page = filters.per_page.unwrap_or(20).min(100).max(1);
+    let per_page = filters.per_page.unwrap_or(20).clamp(1, 100);
 
     let PaginatedWarranties { warranties, total } =
         db::list_warranties(&state.pool, &user.user_id, filters).await?;
@@ -463,7 +463,7 @@ fn validate_create_warranty(req: &CreateWarrantyRequest) -> Result<()> {
         }
     }
     if let Some(months) = req.warranty_months {
-        if months < 1 || months > 120 {
+        if !(1..=120).contains(&months) {
             return Err(AppError::BadRequest(
                 "Warranty months must be between 1 and 120".to_string(),
             ));
@@ -584,7 +584,7 @@ fn validate_update_warranty(req: &UpdateWarrantyRequest) -> Result<()> {
         }
     }
     if let Some(months) = req.warranty_months {
-        if months < 1 || months > 120 {
+        if !(1..=120).contains(&months) {
             return Err(AppError::BadRequest(
                 "Warranty months must be between 1 and 120".to_string(),
             ));
@@ -657,7 +657,7 @@ async fn list_expiring(
         .extensions()
         .get::<AuthUser>()
         .ok_or(AppError::Unauthorized)?;
-    let days = query.days.unwrap_or(30).min(365).max(1);
+    let days = query.days.unwrap_or(30).clamp(1, 365);
 
     let warranties = db::get_expiring_warranties(&state.pool, &user.user_id, days).await?;
     let total = warranties.len() as i64;

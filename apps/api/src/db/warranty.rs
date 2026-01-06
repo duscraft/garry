@@ -58,7 +58,7 @@ pub async fn list_warranties(
     user_id: &str,
     filters: WarrantyFilters,
 ) -> Result<PaginatedWarranties> {
-    let per_page = filters.per_page.unwrap_or(20).min(100).max(1);
+    let per_page = filters.per_page.unwrap_or(20).clamp(1, 100);
     let page = filters.page.unwrap_or(1).max(1);
     let offset = (page - 1) * per_page;
 
