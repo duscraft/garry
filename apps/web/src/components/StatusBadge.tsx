@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { WarrantyStatus } from '../utils/date';
 
 interface StatusBadgeProps {
@@ -7,6 +8,8 @@ interface StatusBadgeProps {
 }
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status, daysRemaining }) => {
+  const { t } = useTranslation();
+  
   const getStyles = () => {
     switch (status) {
       case 'active':
@@ -23,11 +26,11 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status, daysRemaining }) => {
   const getLabel = () => {
     switch (status) {
       case 'active':
-        return 'Active';
+        return t('status.active');
       case 'expiring':
-        return `Expire dans ${daysRemaining} jours`;
+        return t('status.daysRemaining', { days: daysRemaining });
       case 'expired':
-        return 'Expirée';
+        return t('status.expired');
       default:
         return status;
     }

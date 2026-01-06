@@ -112,7 +112,7 @@ const DashboardPage: React.FC = () => {
             </div>
 
             <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow border border-gray-100 dark:border-slate-700 flex flex-col items-center justify-center transition-colors duration-200">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 w-full">Répartition</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 w-full">{t('dashboard.distribution')}</h3>
               <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <RechartsPie>

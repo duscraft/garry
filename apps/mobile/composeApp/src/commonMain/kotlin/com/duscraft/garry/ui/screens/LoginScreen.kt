@@ -15,6 +15,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.duscraft.garry.data.repository.AuthRepository
+import com.duscraft.garry.i18n.LocaleManager
 import com.duscraft.garry.ui.theme.PrimaryBlue
 import com.duscraft.garry.ui.theme.Slate900
 import kotlinx.coroutines.launch
@@ -29,6 +30,7 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onRegisterClick: () -> Unit
 ) {
+    val strings = LocaleManager.strings
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
@@ -71,7 +73,7 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Connexion",
+                    text = strings.login,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -82,7 +84,7 @@ fun LoginScreen(
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    label = { Text("Email") },
+                    label = { Text(strings.email) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -92,7 +94,7 @@ fun LoginScreen(
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Mot de passe") },
+                    label = { Text(strings.password) },
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -117,7 +119,7 @@ fun LoginScreen(
                                 authRepository.login(email, password)
                                 onLoginSuccess()
                             } catch (e: Exception) {
-                                error = "Échec de la connexion. Vérifiez vos identifiants."
+                                error = strings.loginError
                             } finally {
                                 isLoading = false
                             }
@@ -132,7 +134,7 @@ fun LoginScreen(
                             color = Color.White
                         )
                     } else {
-                        Text("Se connecter")
+                        Text(strings.loginButton)
                     }
                 }
                 
@@ -147,7 +149,7 @@ fun LoginScreen(
                                         onLoginSuccess()
                                     }
                                 } else {
-                                    error = "Connectez-vous d'abord avec mot de passe"
+                                    error = strings.biometricFirst
                                 }
                             }
                         },
@@ -155,7 +157,7 @@ fun LoginScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Fingerprint,
-                            contentDescription = "Authentification biométrique",
+                            contentDescription = strings.biometricAuth,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(32.dp)
                         )
@@ -165,7 +167,7 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 TextButton(onClick = onRegisterClick) {
-                    Text("Pas encore de compte ? S'inscrire")
+                    Text(strings.noAccount)
                 }
             }
         }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CreateWarrantyRequest } from '../types';
 import { formatInputDate } from '../utils/date';
 import { Save, X } from 'lucide-react';
@@ -11,6 +12,7 @@ interface WarrantyFormProps {
 }
 
 const WarrantyForm: React.FC<WarrantyFormProps> = ({ initialData, onSubmit, onCancel, isLoading }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<CreateWarrantyRequest>({
     product_name: '',
     brand: '',
@@ -45,30 +47,30 @@ const WarrantyForm: React.FC<WarrantyFormProps> = ({ initialData, onSubmit, onCa
   };
 
   const categories = [
-    'Électroménager',
-    'High-Tech',
-    'Audio & Vidéo',
-    'Maison',
-    'Bricolage',
-    'Mode',
-    'Sport',
-    'Autre'
+    { key: 'appliances', label: t('categories.appliances') },
+    { key: 'highTech', label: t('categories.highTech') },
+    { key: 'audioVideo', label: t('categories.audioVideo') },
+    { key: 'home', label: t('categories.home') },
+    { key: 'diy', label: t('categories.diy') },
+    { key: 'fashion', label: t('categories.fashion') },
+    { key: 'sports', label: t('categories.sports') },
+    { key: 'other', label: t('categories.other') }
   ];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 bg-white dark:bg-slate-800 shadow px-4 py-5 sm:rounded-lg sm:p-6 transition-colors duration-200">
       <div className="md:grid md:grid-cols-3 md:gap-6">
         <div className="md:col-span-1">
-          <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">Informations du produit</h3>
+          <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">{t('form.productInfo')}</h3>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Détails essentiels pour identifier votre garantie.
+            {t('form.productInfoDesc')}
           </p>
         </div>
         <div className="mt-5 md:mt-0 md:col-span-2 space-y-6">
           <div className="grid grid-cols-6 gap-6">
             <div className="col-span-6 sm:col-span-4">
               <label htmlFor="product_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Nom du produit
+                {t('form.productName')}
               </label>
               <input
                 type="text"
@@ -83,7 +85,7 @@ const WarrantyForm: React.FC<WarrantyFormProps> = ({ initialData, onSubmit, onCa
 
             <div className="col-span-6 sm:col-span-3">
               <label htmlFor="brand" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Marque
+                {t('form.brand')}
               </label>
               <input
                 type="text"
@@ -98,7 +100,7 @@ const WarrantyForm: React.FC<WarrantyFormProps> = ({ initialData, onSubmit, onCa
 
             <div className="col-span-6 sm:col-span-3">
               <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Catégorie
+                {t('form.category')}
               </label>
               <select
                 id="category"
@@ -108,9 +110,9 @@ const WarrantyForm: React.FC<WarrantyFormProps> = ({ initialData, onSubmit, onCa
                 onChange={handleChange}
                 className="mt-1 block w-full py-2 px-3 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors duration-200"
               >
-                <option value="" className="dark:bg-slate-700">Sélectionner une catégorie</option>
+                <option value="" className="dark:bg-slate-700">{t('form.selectCategory')}</option>
                 {categories.map(cat => (
-                  <option key={cat} value={cat} className="dark:bg-slate-700">{cat}</option>
+                  <option key={cat.key} value={cat.label} className="dark:bg-slate-700">{cat.label}</option>
                 ))}
               </select>
             </div>
@@ -126,16 +128,16 @@ const WarrantyForm: React.FC<WarrantyFormProps> = ({ initialData, onSubmit, onCa
 
       <div className="md:grid md:grid-cols-3 md:gap-6">
         <div className="md:col-span-1">
-          <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">Détails de la garantie</h3>
+          <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">{t('form.warrantyDetails')}</h3>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Dates et informations d'achat.
+            {t('form.warrantyDetailsDesc')}
           </p>
         </div>
         <div className="mt-5 md:mt-0 md:col-span-2 space-y-6">
           <div className="grid grid-cols-6 gap-6">
             <div className="col-span-6 sm:col-span-3">
               <label htmlFor="store" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Magasin / Site web
+                {t('form.store')}
               </label>
               <input
                 type="text"
@@ -150,7 +152,7 @@ const WarrantyForm: React.FC<WarrantyFormProps> = ({ initialData, onSubmit, onCa
 
             <div className="col-span-6 sm:col-span-3">
               <label htmlFor="purchase_date" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Date d'achat
+                {t('form.purchaseDate')}
               </label>
               <input
                 type="date"
@@ -165,7 +167,7 @@ const WarrantyForm: React.FC<WarrantyFormProps> = ({ initialData, onSubmit, onCa
 
             <div className="col-span-6 sm:col-span-3">
               <label htmlFor="warranty_months" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Durée de garantie (mois)
+                {t('form.warrantyMonths')}
               </label>
               <div className="mt-1 flex rounded-md shadow-sm">
                 <input
@@ -179,12 +181,12 @@ const WarrantyForm: React.FC<WarrantyFormProps> = ({ initialData, onSubmit, onCa
                   className="focus:ring-blue-500 focus:border-blue-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300 dark:border-slate-600 border p-2 bg-white dark:bg-slate-700 text-gray-900 dark:text-white transition-colors duration-200"
                 />
               </div>
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">24 mois = 2 ans (garantie légale standard)</p>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{t('form.warrantyMonthsHint')}</p>
             </div>
             
             <div className="col-span-6">
               <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Notes (optionnel)
+                {t('form.notes')}
               </label>
               <textarea
                 id="notes"
@@ -193,7 +195,7 @@ const WarrantyForm: React.FC<WarrantyFormProps> = ({ initialData, onSubmit, onCa
                 value={formData.notes || ''}
                 onChange={handleChange}
                 className="shadow-sm focus:ring-blue-500 focus:border-blue-500 mt-1 block w-full sm:text-sm border border-gray-300 dark:border-slate-600 rounded-md p-2 bg-white dark:bg-slate-700 text-gray-900 dark:text-white transition-colors duration-200"
-                placeholder="Numéro de série, conditions particulières, etc."
+                placeholder={t('form.notesPlaceholder')}
               />
             </div>
           </div>
@@ -207,7 +209,7 @@ const WarrantyForm: React.FC<WarrantyFormProps> = ({ initialData, onSubmit, onCa
           className="bg-white dark:bg-slate-700 py-2 px-4 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center transition-colors duration-200"
         >
           <X className="w-4 h-4 mr-2" />
-          Annuler
+          {t('form.cancel')}
         </button>
         <button
           type="submit"
@@ -217,11 +219,11 @@ const WarrantyForm: React.FC<WarrantyFormProps> = ({ initialData, onSubmit, onCa
           }`}
         >
           {isLoading ? (
-            <>Enregistrement...</>
+            <>{t('form.saving')}</>
           ) : (
             <>
               <Save className="w-4 h-4 mr-2" />
-              Enregistrer
+              {t('form.save')}
             </>
           )}
         </button>

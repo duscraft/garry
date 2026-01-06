@@ -11,26 +11,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.duscraft.garry.data.model.WarrantyStatus
+import com.duscraft.garry.i18n.LocaleManager
 import com.duscraft.garry.ui.theme.StatusGreen
 import com.duscraft.garry.ui.theme.StatusOrange
 import com.duscraft.garry.ui.theme.StatusRed
 
 @Composable
 fun StatusBadge(status: WarrantyStatus, modifier: Modifier = Modifier) {
+    val strings = LocaleManager.strings
     val (backgroundColor, text, textColor) = when (status) {
         WarrantyStatus.VALID -> Triple(
             StatusGreen.copy(alpha = 0.1f),
-            "Valide",
+            strings.statusValid,
             StatusGreen
         )
         WarrantyStatus.EXPIRING -> Triple(
             StatusOrange.copy(alpha = 0.1f),
-            "Expire bientôt",
+            strings.statusExpiring,
             StatusOrange
         )
         WarrantyStatus.EXPIRED -> Triple(
             StatusRed.copy(alpha = 0.1f),
-            "Expirée",
+            strings.statusExpired,
             StatusRed
         )
     }

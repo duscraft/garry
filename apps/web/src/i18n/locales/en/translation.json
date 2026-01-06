@@ -15,19 +15,107 @@
     "addWarranty": "Add warranty",
     "loading": "Loading...",
     "error": "Error loading data",
-    "retry": "Retry"
+    "retry": "Retry",
+    "distribution": "Distribution"
   },
   "nav": {
     "dashboard": "Dashboard",
     "add": "Add",
     "logout": "Logout",
-    "profile": "Profile"
+    "profile": "Profile",
+    "addWarranty": "Add warranty",
+    "lightMode": "Switch to light mode",
+    "darkMode": "Switch to dark mode"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Create account",
+    "email": "Email address",
+    "password": "Password",
+    "name": "Full name",
+    "loginButton": "Sign in",
+    "registerButton": "Sign up",
+    "loggingIn": "Signing in...",
+    "registering": "Signing up...",
+    "noAccount": "Or",
+    "createAccount": "create a free account",
+    "hasAccount": "sign in to your account",
+    "loginError": "Invalid email or password",
+    "registerError": "Registration error",
+    "minPassword": "Minimum 8 characters"
+  },
+  "warranty": {
+    "details": "Warranty details",
+    "fullInfo": "Complete information about your product.",
+    "backToDashboard": "Back to dashboard",
+    "delete": "Delete",
+    "edit": "Edit",
+    "confirmDelete": "Are you sure you want to delete this warranty?",
+    "deleteError": "Error deleting warranty",
+    "notFound": "Warranty not found",
+    "error": "Error"
+  },
+  "form": {
+    "productInfo": "Product information",
+    "productInfoDesc": "Essential details to identify your warranty.",
+    "warrantyDetails": "Warranty details",
+    "warrantyDetailsDesc": "Purchase dates and information.",
+    "productName": "Product name",
+    "brand": "Brand",
+    "category": "Category",
+    "selectCategory": "Select a category",
+    "store": "Store / Website",
+    "purchaseDate": "Purchase date",
+    "warrantyMonths": "Warranty duration (months)",
+    "warrantyMonthsHint": "24 months = 2 years (standard legal warranty)",
+    "notes": "Notes (optional)",
+    "notesPlaceholder": "Serial number, special conditions, etc.",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving..."
+  },
+  "categories": {
+    "appliances": "Appliances",
+    "highTech": "High-Tech",
+    "audioVideo": "Audio & Video",
+    "home": "Home",
+    "diy": "DIY",
+    "fashion": "Fashion",
+    "sports": "Sports",
+    "other": "Other"
+  },
+  "fields": {
+    "category": "Category",
+    "store": "Store",
+    "purchaseDate": "Purchase date",
+    "warrantyEnd": "Warranty end",
+    "notes": "Notes",
+    "months": "months"
+  },
+  "pages": {
+    "addWarranty": "Add warranty",
+    "addWarrantyDesc": "Register a new warranty to never lose it.",
+    "editWarranty": "Edit warranty",
+    "editWarrantyDesc": "Update your warranty information."
+  },
+  "status": {
+    "active": "Active",
+    "expiringSoon": "Expiring soon",
+    "expired": "Expired",
+    "daysRemaining": "{{days}} days remaining",
+    "daysExpired": "Expired {{days}} days ago"
   },
   "common": {
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
     "edit": "Edit",
-    "view": "View"
+    "view": "View",
+    "loading": "Loading...",
+    "error": "Error"
+  },
+  "language": {
+    "fr": "Français",
+    "en": "English"
   }
 }

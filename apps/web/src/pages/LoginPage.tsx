@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
 import { Shield, AlertCircle } from 'lucide-react';
+import LanguageSelector from '../components/LanguageSelector';
 
 const LoginPage: React.FC = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -34,7 +37,7 @@ const LoginPage: React.FC = () => {
       navigate(from, { replace: true });
     } catch (err: any) {
       console.error(err);
-      setError(err.message || 'Email ou mot de passe incorrect');
+      setError(err.message || t('auth.loginError'));
     } finally {
       setLoading(false);
     }
@@ -42,18 +45,22 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 transition-colors duration-200">
+      <div className="absolute top-4 right-4">
+        <LanguageSelector />
+      </div>
+      
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <Link to="/" className="flex justify-center items-center">
           <Shield className="h-10 w-10 text-blue-600 dark:text-blue-500" />
           <span className="ml-2 text-3xl font-bold text-gray-900 dark:text-white">Garry</span>
         </Link>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-          Connexion
+          {t('auth.login')}
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-          Ou{' '}
+          {t('auth.noAccount')}{' '}
           <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
-            créez un compte gratuitement
+            {t('auth.createAccount')}
           </Link>
         </p>
       </div>
@@ -76,7 +83,7 @@ const LoginPage: React.FC = () => {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Adresse email
+                {t('auth.email')}
               </label>
               <div className="mt-1">
                 <input
@@ -94,7 +101,7 @@ const LoginPage: React.FC = () => {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Mot de passe
+                {t('auth.password')}
               </label>
               <div className="mt-1">
                 <input
@@ -118,7 +125,7 @@ const LoginPage: React.FC = () => {
                   loading ? 'opacity-75 cursor-not-allowed' : ''
                 }`}
               >
-                {loading ? 'Connexion en cours...' : 'Se connecter'}
+                {loading ? t('auth.loggingIn') : t('auth.loginButton')}
               </button>
             </div>
           </form>

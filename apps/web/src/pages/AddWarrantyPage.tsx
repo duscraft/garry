@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { CreateWarrantyRequest } from '../types';
 import Navbar from '../components/Navbar';
 import WarrantyForm from '../components/WarrantyForm';
 import { ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 const AddWarrantyPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -24,7 +25,7 @@ const AddWarrantyPage: React.FC = () => {
       navigate('/');
     } catch (err: any) {
       console.error(err);
-      setError(err.message || 'Impossible de créer la garantie');
+      setError(err.message || t('common.error'));
     } finally {
       setLoading(false);
     }
@@ -38,9 +39,9 @@ const AddWarrantyPage: React.FC = () => {
         <div className="mb-6">
           <Link to="/" className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 mb-4 transition-colors duration-200">
             <ArrowLeft className="w-4 h-4 mr-1" />
-            Retour au tableau de bord
+            {t('warranty.backToDashboard')}
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Ajouter une garantie</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('pages.addWarranty')}</h1>
         </div>
 
         {error && (

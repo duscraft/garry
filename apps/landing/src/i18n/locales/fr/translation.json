@@ -1,0 +1,38 @@
+{
+  "hero": {
+    "title": "Ne perdez plus jamais une garantie",
+    "subtitle": "Garry centralise vos factures et garanties. Recevez des rappels avant expiration et gardez l'esprit tranquille.",
+    "cta": "Commencer gratuitement",
+    "secondary_cta": "Télécharger l'app"
+  },
+  "features": {
+    "title": "Tout ce dont vous avez besoin",
+    "subtitle": "Une suite complète d'outils pour gérer vos achats sereinement",
+    "scan": {
+      "title": "Scan intelligent",
+      "description": "Prenez vos factures en photo, Garry extrait automatiquement les informations importantes."
+    },
+    "reminders": {
+      "title": "Rappels automatiques",
+      "description": "Soyez notifié avant la fin de vos garanties pour ne rater aucune opportunité de réparation."
+    },
+    "secure": {
+      "title": "Stockage sécurisé",
+      "description": "Vos documents sont chiffrés et sauvegardés en lieu sûr. Accessibles partout, tout le temps."
+    },
+    "search": {
+      "title": "Recherche instantanée",
+      "description": "Retrouvez n'importe quelle facture en quelques secondes grâce à la recherche puissante."
+    }
+  },
+  "app": {
+    "title": "Garry partout avec vous",
+    "subtitle": "Disponible sur iOS, Android et Web. Vos données sont synchronisées en temps réel.",
+    "web_btn": "Ouvrir l'application Web"
+  },
+  "footer": {
+    "copyright": "© 2024 Garry. Tous droits réservés.",
+    "legal": "Mentions légales",
+    "privacy": "Confidentialité"
+  }
+}
