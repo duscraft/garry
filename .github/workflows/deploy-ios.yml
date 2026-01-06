@@ -5,15 +5,6 @@ on:
     tags:
       - 'ios-v*'
   workflow_dispatch:
-    inputs:
-      destination:
-        description: 'Deployment destination'
-        required: true
-        default: 'testflight'
-        type: choice
-        options:
-          - testflight
-          - app-store
 
 env:
   JAVA_VERSION: '17'
@@ -48,7 +39,13 @@ jobs:
             ${{ runner.os }}-konan-
 
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+        run: |
+          if [ -d "/Applications/Xcode_15.4.app" ]; then
+            echo "Selecting Xcode 15.4..."
+            sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+          else
+            echo "Xcode 15.4 not found; using default Xcode on runner."
+          fi
 
       - name: Install Apple Certificate
         env:
@@ -132,9 +129,18 @@ jobs:
           mkdir -p ~/.appstoreconnect/private_keys
           echo -n "$APPLE_API_KEY_BASE64" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_$APPLE_API_KEY_ID.p8
           
+          # Find the IPA file dynamically
+          IPA_PATH=$(find "$RUNNER_TEMP/export" -maxdepth 1 -type f -name "*.ipa" | head -n 1)
+          if [ -z "$IPA_PATH" ]; then
+            echo "Error: No IPA file found in $RUNNER_TEMP/export"
+            ls -al "$RUNNER_TEMP/export" || true
+            exit 1
+          fi
+          
+          echo "Uploading IPA: $IPA_PATH"
           xcrun altool --upload-app \
             --type ios \
-            --file "$RUNNER_TEMP/export/Garry.ipa" \
+            --file "$IPA_PATH" \
             --apiKey "$APPLE_API_KEY_ID" \
             --apiIssuer "$APPLE_API_ISSUER_ID"
 

@@ -84,3 +84,7 @@ jobs:
           track: ${{ github.event.inputs.track || 'internal' }}
           status: completed
           whatsNewDirectory: apps/mobile/whatsnew
+
+      - name: Clean up keystore
+        if: always()
+        run: rm -f keystore.jks

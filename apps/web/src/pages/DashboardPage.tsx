@@ -6,10 +6,12 @@ import WarrantyCard from '../components/WarrantyCard';
 import { Plus, Search, AlertCircle, RefreshCw, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '../context/ThemeContext';
 import { Tooltip, Legend, ResponsiveContainer, PieChart as RechartsPie, Pie, Cell } from 'recharts';
 
 const DashboardPage: React.FC = () => {
   const { t } = useTranslation();
+  const { theme } = useTheme();
   const [warranties, setWarranties] = useState<Warranty[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -129,8 +131,12 @@ const DashboardPage: React.FC = () => {
                       ))}
                     </Pie>
                     <Tooltip 
-                      contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }}
-                      itemStyle={{ color: '#f8fafc' }}
+                      contentStyle={{ 
+                        backgroundColor: theme === 'dark' ? '#1e293b' : '#ffffff', 
+                        borderColor: theme === 'dark' ? '#334155' : '#e5e7eb', 
+                        color: theme === 'dark' ? '#f8fafc' : '#1f2937' 
+                      }}
+                      itemStyle={{ color: theme === 'dark' ? '#f8fafc' : '#1f2937' }}
                     />
                     <Legend />
                   </RechartsPie>
