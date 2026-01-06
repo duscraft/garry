@@ -270,10 +270,7 @@ async fn categories_have_french_names() {
         .unwrap();
     assert_eq!(electronics["name_fr"], "Électronique");
 
-    let appliances = categories
-        .iter()
-        .find(|c| c["id"] == "appliances")
-        .unwrap();
+    let appliances = categories.iter().find(|c| c["id"] == "appliances").unwrap();
     assert_eq!(appliances["name_fr"], "Électroménager");
 }
 
@@ -302,15 +299,9 @@ async fn categories_have_default_warranty_months() {
         .unwrap();
     assert_eq!(electronics["default_warranty_months"], 24);
 
-    let appliances = categories
-        .iter()
-        .find(|c| c["id"] == "appliances")
-        .unwrap();
+    let appliances = categories.iter().find(|c| c["id"] == "appliances").unwrap();
     assert_eq!(appliances["default_warranty_months"], 24);
 
-    let clothing = categories
-        .iter()
-        .find(|c| c["id"] == "clothing")
-        .unwrap();
+    let clothing = categories.iter().find(|c| c["id"] == "clothing").unwrap();
     assert_eq!(clothing["default_warranty_months"], 6);
 }
