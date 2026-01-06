@@ -4,7 +4,7 @@ use tower_http::cors::{Any, CorsLayer};
 pub async fn create_test_app() -> Router {
     use axum::{
         extract::State,
-        http::{header, StatusCode, Request},
+        http::{header, Request, StatusCode},
         middleware::{self, Next},
         response::Response,
         routing::{get, post},
@@ -196,12 +196,23 @@ pub async fn create_test_app() -> Router {
         .route("/api/v1/categories", get(list_categories));
 
     let protected_routes = Router::new()
-        .route("/api/v1/warranties", get(list_warranties).post(create_warranty))
-        .route("/api/v1/warranties/:id", get(get_warranty).put(update_warranty).delete(delete_warranty))
+        .route(
+            "/api/v1/warranties",
+            get(list_warranties).post(create_warranty),
+        )
+        .route(
+            "/api/v1/warranties/:id",
+            get(get_warranty)
+                .put(update_warranty)
+                .delete(delete_warranty),
+        )
         .route("/api/v1/warranties/:id/receipt", post(upload_receipt))
         .route("/api/v1/warranties/expiring", get(list_expiring))
         .route("/api/v1/stats", get(get_stats))
-        .layer(middleware::from_fn_with_state(state.clone(), auth_middleware));
+        .layer(middleware::from_fn_with_state(
+            state.clone(),
+            auth_middleware,
+        ));
 
     Router::new()
         .merge(public_routes)
